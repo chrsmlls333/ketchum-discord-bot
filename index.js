@@ -1,5 +1,9 @@
 /*
+    Discord-Downloader
+    written by Chris Eugene Mills 
+    March 2020
 
+    Pulls data and files from Discord
 */
 
 //=========================================
