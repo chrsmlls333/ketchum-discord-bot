@@ -5,13 +5,15 @@ module.exports = {
 
     // args: "",
 
-    instances: 1,
+    // instances: 1,
     autorestart: true,
     watch: true,
-    watch_delay: 1000,
-    ignore_watch: ["node_modules", "logs", "debug_message.json"],
+    //watch: [".", "configuration", "commands"],
+    // watch_delay: 1000,
+    //ignore_watch: ["node_modules", "logs", "debug_message.json"],
 
     max_memory_restart: '1G',
+
     env: {
       NODE_ENV: 'development'
     },
