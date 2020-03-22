@@ -4,7 +4,11 @@
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node .",
+    "pm2start": "pm2 start index.js --name 'discord-downloader' --watch; pm2 monit",
+    "pm2stop": "pm2 stop 'discord-downloader' --watch",
+    "lint": "eslint ."
   },
   "author": "Chris Mills",
   "license": "ISC",
