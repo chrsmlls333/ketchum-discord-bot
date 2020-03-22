@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
-    "pm2start": "pm2 start index.js --name 'discord-downloader' --watch; pm2 monit",
-    "pm2stop": "pm2 stop 'discord-downloader' --watch",
+    "pm2start": "pm2 start ecosystem.config.js; pm2 monit",
+    "pm2stop": "pm2 stop ecosystem.config.js",
     "lint": "eslint ."
   },
   "author": "Chris Mills",
