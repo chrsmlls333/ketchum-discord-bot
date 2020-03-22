@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
 const logger = require('winston');
 
+var moment = require('moment');
+
+
 module.exports = {
 
     name: 'download',
