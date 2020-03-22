@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+const utils = require('../utils');
 const logger = require('winston');
 
 module.exports = {
