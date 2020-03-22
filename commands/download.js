@@ -15,36 +15,36 @@ module.exports = {
     guildOnly: true,
 
     args: true,
-    usage: '[channel] [time]',
+    usage: '[#channel, here, this] [@user, time]',
     
-	execute(message, args) {
+	async execute(message, args) {
 
-        const client = message.client;
+        // const client = message.client;
 
-        const getUserFromMention = (mention) => {
-            const matches = mention.match(/^<@!?(\d+)>$/);
-            if (!matches) return;
-            const id = matches[1];
-            return client.users.cache.get(id);
-        }
+        // Parse Arguments =================================================================
         
-        const getChannelFromMention = (mention) => {
-            const matches = mention.match(/^<#(\d+)>$/);
-            if (!matches) return;
-            const id = matches[1];
-            return client.channels.cache.get(id);
-        }
-
-        const channel = getChannelFromMention(args[0]);
+        let channel = utils.getChannelFromMention(message, args[0]);
+        if (!channel && args[0].match(/(this|here)/)) channel = message.channel;
         if (!channel) return message.reply("I don't see a channel mention, sorry!");
 
+
         let user;
-        if (args.length > 1) {
-            user = getUserFromMention(args[1]);
-            if (!user) message.reply("I don't see a user mention, but thats fine I guess!");
+        if (args.length >= 2) {
+            user = utils.getUserFromMention(message, args[1]);
+            if (!user && utils.isRoleFromMention(args[1])) await message.reply("I don't know what to do with roles and bots. Ignoring that last bit!");
+            if (!user) await message.reply("I don't see a user mention, but thats fine I guess!");
         }
 
-        //=================================================================================
+        // Reply with plain english understanding of command
+        let understanding = `I hear you want to scan messages `;
+        if (user) understanding += `posted by ${user} `
+        understanding += `on ${channel}`
+        if (false) understanding += ` from the last x days`
+        logger.info(understanding);
+        await message.reply(understanding);
+
+
+        // Go Fetch =================================================================
 
 
         let initData = {
@@ -55,7 +55,7 @@ module.exports = {
             scanUser: user,
 
             iterations: 0,
-            iterationsMax: 10,
+            iterationsMax: null, //HARDCODED
 
             collectedTotal: 0,
             collectedFiltered() { return this.collectionFiltered.size },
@@ -64,33 +64,31 @@ module.exports = {
 
             nextFetchSettings: {
                 before: null,
-                limit: 50
+                limit: 50 //HARDCODED
             },
-            fetchDelay: 1000,
+            fetchDelay: 1000, //HARDCODED
 
             exhausted: false
         }
 
-        const sleeper = (ms) => {
-            return function(x) {
-              return new Promise(resolve => setTimeout(() => resolve(x), ms));
-            };
-        }
-
         const fetch = ( idata ) => {
-            logger.info("Fetch! " + (idata.iterations+1));
+            logger.debug("Fetch! " + (idata.iterations+1));
             
             return idata.scanChannel.messages.fetch(idata.nextFetchSettings)
             // .then(messages => data.commandMessage.reply(`I see ${messages.size} results here!`))
-            .then(messages => {
+            .then(async messages => {
                 let data = idata;
                 data.iterations++;
 
                 // CHECK FOR NOTHING
                 if (!messages.size) {
                     data.exhausted = true;
-                    data.commandMessage.reply(`(${data.iterations}) We're fresh out!`);
-                    return { data };
+                    return utils.appendEdit(data.statusMessage, ` Finished!`)
+                    .then(message => {
+                        logger.info(message.cleanContent);
+                        data.statusMessage = message;
+                        return { data }
+                    });
                 }
 
                 // GET EARLIEST
@@ -109,33 +107,32 @@ module.exports = {
                 data.nextFetchSettings.before = earliestSnowflake;
                 
                 // REPORT
-                data.commandMessage.reply(`(${data.iterations}) I see ${data.collectedFilteredDelta}/${messages.size} results here!`)
-
-                // RETURN
+                return utils.replyOrEdit(data.commandMessage, data.statusMessage, 
+                    `I see ${data.collectedFiltered()}/${data.collectedTotal} results here from ${data.iterations}${data.iterationsMax ? "/" + data.iterationsMax : ""} pass${data.iterations != 1 ? "es" : ""}!`)
+                .then(message => {
+                    data.statusMessage = message;
                 return {
                     messages,
                     data
                 };
+                });
             })
-            .then(sleeper(idata.fetchDelay))
+            // .then(sleeper(idata.fetchDelay))
             .then(({ data }) => {
-
-                // Check if exhausted
                 if (data.exhausted) return data;
+                if (data.iterationsMax) if (data.iterations >= data.iterationsMax) return data;
+                return utils.sleep(data.fetchDelay)
+                .then(() => fetch(data)); // Else lets go for another round
+            });
 
-                // Iteration limiter
-                if (data.iterationsMax) {
-                    if (data.iterations >= data.iterationsMax) return data;
                 } 
 
-                // Else lets go for another round
-                return fetch( data )
-            });
         
-		}
+        let results = await fetch(initData).catch(e => logger.error(e.stack));
 		
 		
-        let results = fetch(initData).catch(console.error);
+        // Prepare for export ====================================================================
+
 
 
         // Prepare for export

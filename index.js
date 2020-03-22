@@ -40,10 +40,10 @@ client.on('message', message => {
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    if (!client.commands.has(commandName)) return;
-
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     if (!command) return;
+
+    logger.debug(`'${message.content}'`); //log recieved command!
 
     if (command.guildOnly && message.channel.type !== 'text') {
         return message.reply('I can\'t execute that command inside DMs!');
@@ -76,10 +76,11 @@ client.on('message', message => {
 	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
     try {
+        logger.debug("Execute!");
         command.execute(message, args);
     } catch (error) {
-        logger.error(message.content)
-        logger.error(error);
+        logger.error(`'${message.content}'`)
+        logger.error(error.stack);
         message.reply('there was an error trying to execute that command!');
     }
 
