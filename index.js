@@ -11,6 +11,7 @@
 const Discord = require('discord.js');
 
 const { prefix, token } = require('./configuration/config.json');
+const logger = require('./configuration/logConfig');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
@@ -28,7 +29,7 @@ const cooldowns = new Discord.Collection();
 
 
 client.once('ready', () => {
-    console.log('Ready!');
+    logger.info('Ready!');
     // client.user.setActivity('the thread!', { type: 'WATCHING' });
 });
 
@@ -77,7 +78,8 @@ client.on('message', message => {
     try {
         command.execute(message, args);
     } catch (error) {
-        console.error(error);
+        logger.error(message.content)
+        logger.error(error);
         message.reply('there was an error trying to execute that command!');
     }
 

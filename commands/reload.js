@@ -1,3 +1,5 @@
+const logger = require('winston');
+
 module.exports = {
 
 	name: 'reload',

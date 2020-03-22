@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const logger = require('winston');
 
 module.exports = {
 
@@ -73,7 +74,7 @@ module.exports = {
         }
 
         const fetch = ( idata ) => {
-            console.log("Fetch! " + (idata.iterations+1));
+            logger.info("Fetch! " + (idata.iterations+1));
             
             return idata.scanChannel.messages.fetch(idata.nextFetchSettings)
             // .then(messages => data.commandMessage.reply(`I see ${messages.size} results here!`))
