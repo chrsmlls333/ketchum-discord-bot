@@ -1,4 +1,2 @@
 node_modules
-.env
-logs/exceptions.log
-logs/output.log
+logs
