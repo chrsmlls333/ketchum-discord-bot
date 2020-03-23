@@ -7,6 +7,11 @@ const moment = require('moment');
 const path = require('path');
 const urlLib = require('url');
 
+const pug = require('pug');
+const buildDownloadHtml = pug.compileFile('templates/download.pug');
+
+const fsp = require('fs').promises;
+
 
 module.exports = {
 
@@ -170,6 +175,7 @@ module.exports = {
                 allAttachments.set(key, {
                     author,
                     url,
+                    createdAt,
                     basename,
                     newname
                 })
@@ -184,34 +190,26 @@ module.exports = {
             });
         })
 
-        let html = "<!DOCTYPE html>\n<html>\n<body>\n"
-        html += `<img src="${scanChannel.guild.iconURL({ format: "jpg", dynamic: true, size: 64 })}" >`
-        html += `<h1>Images/Files posted in ${scanChannel.guild.name}#${scanChannel.name}${scanUser ? " by " + scanUser.tag: ""}</h1>\n`
-        html += `<h3>Scanned ${moment().format("MMMM Do YYYY, h:mm:ss a")}</h3>\n`
-        let dtaLink = false;
-        html += `<p>To download all files here, I recommend using ${dtaLink ? "<a href='https://www.downthemall.net/'>" : ""}DownThemAll${dtaLink ? "</a>" : ""} on Firefox to pull all the links at once.</p>
-        <p>On the 'Select your Downloads' dialog, use <code>*text*</code> as your Mask to rename the file with the user and posting date like it's listed here.</p>
-        <p>✨</p>`
-        html += "<ul>\n"
-        allAttachments.each((a) => {
-            html += `<li><a href="${a.url}" target="_blank">${a.newname}</a></li>\n`
+
+
+        let html2 = buildDownloadHtml({
+            scanChannel,
+            scanUser,
+            moment,
+            attachments: Array.from(allAttachments.values())
         })
-        html += "</ul>\n"
-        html += "</body>\n</html>\n"
 
 
 
-        //return
+        const htmlData = Buffer.from(html2);
 
-        const htmlData = Buffer.from(html);
+        fsp.writeFile("logs/debug.html", htmlData, 'utf8')
+        .then(() => console.log("Message data saved!"))
+        .catch(error => console.log(error));
 
-        // fsp.writeFile("debug_message.json", jsonData, 'utf8')
-        // .then(() => console.log("Message data saved!"))
-        // .catch(error => console.log(error));
 
         const attachment = new Discord.MessageAttachment(htmlData, `${scanChannel.name}-attachments.html`);
-
-        commandMessage.channel.send(`${commandMessage.author}, here you go!`, attachment);
+        commandMessage.reply(`here you go!`, attachment);
 
 
         // if (message.mentions.users include me)

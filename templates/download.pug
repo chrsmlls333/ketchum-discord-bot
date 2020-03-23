@@ -1,0 +1,78 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        meta(http-equiv="X-UA-Compatible", content="ie=edge")
+        title Document
+
+        link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css' integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh' crossorigin='anonymous')
+        style. 
+            .card {
+                overflow: hidden;
+            }
+            .card-horizontal {
+                display: flex;
+                flex: 1 1 auto;
+            }
+            img#serverIcon {
+                height: 4.5em;
+                border-top-left-radius: 0.25rem;
+                border-bottom-right-radius: 0.25rem;
+            }
+    body
+        .container-fluid
+            .card.mt-3
+                .card-horizontal
+                    .img-square-wrapper
+                        img#serverIcon(src=scanChannel.guild.iconURL({ format: "jpg", dynamic: true, size: 128 }))
+                    .card-body
+                        h4#title.card-title.mb-4!= `📦 Images/Files posted in <u>${scanChannel.guild.name}#${scanChannel.name}</u>${scanUser ? ` by <u>${scanUser.tag}</u>`: ""}`
+                        hr
+                        .alert.alert-light.mt-4.p-0
+                            h4.alert-heading 🔖 Instructions
+                            p.text-justify To download all files here, I recommend using DownThemAll on Firefox to pull all the links at once. 
+                            p.text-justify.mb-0 On the 'Select your Downloads' dialog, use 
+                                code *title*
+                                |  as your Mask 🏷️ to rename the file with the username, posting date, and original filename.
+                .card-footer
+                    small.text-muted= `Scanned ${moment().format("MMMM Do YYYY, h:mm:ss a")} by Ketchum bot for Discord`
+                        
+
+            //- //- hr
+            //- .alert.alert-light.mt-4
+            //-     h4.alert-heading 🔖 Instructions
+            //-     hr
+            //-     p.text-justify To download all files here, I recommend using DownThemAll on Firefox to pull all the links at once. 
+            //-     p.text-justify On the 'Select your Downloads' dialog, use 
+            //-         code *title*
+            //-         |  as your Mask 🏷️ to rename the file with the username, posting date, and original filename.
+            
+
+            //- Possibly convert to array?
+            if attachments
+                //- #all-links.list-group.list-group-flush
+                //-     each a, i in allAttachments
+                //-         a.list-group-item.list-group-item-action(href=a.url target='_blank')= a.newname
+
+                .table-responsive.mt-4
+                    table.table.table-striped.table-bordered.table-sm
+                        thead
+                            tr
+                                th(scope="col") #
+                                th(scope="col") User
+                                th(scope="col") File
+                                th(scope="col") Posted
+                                th(scope="col" style="width:1em;") Link
+                        tbody
+                            each a, i in attachments
+                                tr  
+                                    th(scope="row")= i + 1
+                                    td= a.author.tag
+                                    td= a.basename
+                                    td= moment(a.createdAt).format("YYYY/MM/DD")
+                                    td.text-center
+                                        a(href=a.url title=a.newname target='_blank') 💾
+
+            else
+                p No attachments found?

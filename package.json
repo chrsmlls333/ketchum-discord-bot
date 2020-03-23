@@ -6,9 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
-    "pm2start": "pm2 start index.js --name 'discord-downloader' --watch --ignore-watch='node_modules logs debug_message.json'; pm2 monit",
-    "pm2stop": "pm2 stop 'discord-downloader'",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pug:watch": "pug -w ./templates -o ./templates/html/ -P" 
   },
   "author": "Chris Mills",
   "license": "ISC",
@@ -16,6 +15,7 @@
     "discord.js": "^12.0.2",
     "eslint": "^6.8.0",
     "moment": "^2.24.0",
+    "pug": "^2.0.4",
     "winston": "^3.2.1"
   }
 }
