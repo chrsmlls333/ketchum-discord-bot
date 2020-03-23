@@ -100,7 +100,11 @@ module.exports = {
                 let earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
 
                 // FILTER
-                let newFiltered = messages.filter(m => m.attachments.size || m.embeds.length ); //make sure at least one attachment or embed
+                let newFiltered = messages.filter(m => { //make sure at least one attachment or embed
+                    if (m.attachments.size) return true;
+                    if (m.embeds.length) return m.embeds.some(e => new RegExp("image|video").test(e.type));
+                    return false;
+                }); 
                 if (data.scanUser) newFiltered = newFiltered.filter(m => m.author.id === data.scanUser.id);
 
                 // UPDATE DATA
@@ -176,11 +180,7 @@ module.exports = {
             embeds.forEach((e, i, alle) => {
                 const { type, url } = e;
                 const garbageSnowflake = sfm + `-embed-${i}`;
-                
-                if ((type == 'image' || type == 'video') && url) ingestAttachmentEmbed(garbageSnowflake, url);
-
-                logger.debug(type)
-                logger.debug(url)
+                if (new RegExp("image|video").test(type) && url) ingestAttachmentEmbed(garbageSnowflake, url);
             });
         })
 
