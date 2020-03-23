@@ -2,7 +2,10 @@ const Discord = require('discord.js');
 const utils = require('../utils');
 const logger = require('winston');
 
-var moment = require('moment');
+const moment = require('moment');
+
+const path = require('path');
+const urlLib = require('url');
 
 
 module.exports = {
@@ -38,8 +41,9 @@ module.exports = {
         // Reply with plain english understanding of command
         let understanding = `I hear you want to scan messages `;
         if (user) understanding += `posted by ${user} `
-        understanding += `on ${channel}`
-        if (false) understanding += ` from the last x days`
+        understanding += `on ${channel} `
+        if (false) understanding += `from the last x days `
+        understanding += `for any and all attachments. One sec...`
         logger.info(understanding);
         await message.reply(understanding);
 
@@ -96,7 +100,7 @@ module.exports = {
                 let earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
 
                 // FILTER
-                let newFiltered = messages.filter(m => m.attachments.size); //make sure at least one attachment
+                let newFiltered = messages.filter(m => m.attachments.size || m.embeds.length ); //make sure at least one attachment or embed
                 if (data.scanUser) newFiltered = newFiltered.filter(m => m.author.id === data.scanUser.id);
 
                 // UPDATE DATA
@@ -133,6 +137,52 @@ module.exports = {
 		
         // Prepare for export ====================================================================
 
+        /*
+            https://superuser.com/questions/268278/utility-to-download-and-rename-a-bunch-of-files
+            https://superuser.com/questions/274276/what-program-can-i-use-to-bulk-download-this-list-of-links
+        */
+
+        const { 
+            commandMessage, 
+            statusMessage, 
+            scanChannel, 
+            scanUser, 
+            collectionFiltered: messages 
+        } = results;
+
+        let allAttachments = new Discord.Collection();
+
+        messages.each((m, sfm, allm) => {
+            const { attachments, embeds, author, createdAt } = m;
+
+            let username = author.username.replace(/[^\w-]+/g, "") || author.tag;
+            const createdString = moment(createdAt).format("YYYYMMDD-HHmmss");
+
+            const ingestAttachmentEmbed = (key, url) => {
+                let basename = path.basename( urlLib.parse(url).pathname );
+                basename = basename.replace(/^(SPOILER_)/, "");
+                const newname = `${username}_${createdString}_${basename}`;
+
+                allAttachments.set(key, {
+                    author,
+                    url,
+                    basename,
+                    newname
+                })
+            };
+
+            attachments.each((a, sfa, alla) => ingestAttachmentEmbed(sfa, a.url));
+
+            embeds.forEach((e, i, alle) => {
+                const { type, url } = e;
+                const garbageSnowflake = sfm + `-embed-${i}`;
+                
+                if ((type == 'image' || type == 'video') && url) ingestAttachmentEmbed(garbageSnowflake, url);
+
+                logger.debug(type)
+                logger.debug(url)
+            });
+        })
 
 
         // Prepare for export
