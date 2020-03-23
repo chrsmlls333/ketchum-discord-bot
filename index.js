@@ -23,6 +23,7 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
+var moment = require('moment'); // eslint-disable-line no-unused-vars
 const cooldowns = new Discord.Collection();
 
 //=========================================

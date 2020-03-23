@@ -28,13 +28,13 @@ module.exports = {
 	async execute(message, args) {
 
         // const client = message.client;
-
-        // Parse Arguments =================================================================
         
+        // Parse Arguments =================================================================
+
         let channel = utils.getChannelFromMention(message, args[0]);
         if (!channel && args[0].match(/(this|here)/)) channel = message.channel;
         if (!channel) return message.reply("I don't see a channel mention, sorry!");
-
+        
 
         let user;
         if (args.length >= 2) {
@@ -47,7 +47,7 @@ module.exports = {
         let understanding = `I hear you want to scan messages `;
         if (user) understanding += `posted by ${user} `
         understanding += `on ${channel} `
-        if (false) understanding += `from the last x days `
+        if (false) understanding += `from the last x days ` // eslint-disable-line no-constant-condition
         understanding += `for any and all attachments. One sec...`
         logger.info(understanding);
         await message.reply(understanding);
@@ -64,7 +64,7 @@ module.exports = {
             scanUser: user,
 
             iterations: 0,
-            iterationsMax: null, //HARDCODED
+            iterationsMax: 2, //HARDCODED
 
             collectedTotal: 0,
             collectedFiltered() { return this.collectionFiltered.size },
@@ -124,10 +124,10 @@ module.exports = {
                     `I see ${data.collectedFiltered()}/${data.collectedTotal} results here from ${data.iterations}${data.iterationsMax ? "/" + data.iterationsMax : ""} pass${data.iterations != 1 ? "es" : ""}!`)
                 .then(message => {
                     data.statusMessage = message;
-                return {
-                    messages,
-                    data
-                };
+                    return {
+                        messages,
+                        data
+                    };
                 });
             })
             // .then(sleeper(idata.fetchDelay))
@@ -138,12 +138,12 @@ module.exports = {
                 .then(() => fetch(data)); // Else lets go for another round
             });
 
-                } 
+        }
 
-        
+
         let results = await fetch(initData).catch(e => logger.error(e.stack));
-		
-		
+
+
         // Prepare for export ====================================================================
 
         /*
@@ -153,7 +153,6 @@ module.exports = {
 
         const { 
             commandMessage, 
-            statusMessage, 
             scanChannel, 
             scanUser, 
             collectionFiltered: messages 
@@ -199,7 +198,7 @@ module.exports = {
             attachments: Array.from(allAttachments.values())
         })
 
-
+        
 
         const htmlData = Buffer.from(html2);
 
