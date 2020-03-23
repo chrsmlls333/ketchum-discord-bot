@@ -70,7 +70,7 @@ module.exports = {
                 before: null,
                 limit: 50 //HARDCODED
             },
-            fetchDelay: 1000, //HARDCODED
+            fetchDelay: 500, //HARDCODED
 
             exhausted: false
         }
