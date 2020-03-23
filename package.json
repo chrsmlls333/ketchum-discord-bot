@@ -4,8 +4,9 @@
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
+    "start:pm2": "pm2 start index.js --name 'discord-downloader' --watch --ignore-watch='node_modules logs debug_message.json'; pm2 monit",
+    "stop:pm2": "pm2 stop 'discord-downloader'",
     "lint": "eslint .",
     "pug:watch": "pug -w ./templates -o ./templates/html/ -P" 
   },
