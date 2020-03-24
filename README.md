@@ -1,4 +1,4 @@
-# Welcome to ketchum-discord-bot ✨
+# ketchum-discord-bot ✨
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
@@ -6,16 +6,12 @@
 
 ## Install
 
-```sh
-npm install
-npm install pm2 -g
-```
+1. Build `npm install`
+2. Optional but recommended: `npm install pm2 -g`
+3. Enter your Discord Bot Token in `configuration/token.json`
+4. List our tasks: `npx ntl`
+5. Run `npm run start` or `npm run start:pm2`
 
-## List our tasks
-
-```sh
-npx ntl
-```
 
 ## Author
 
