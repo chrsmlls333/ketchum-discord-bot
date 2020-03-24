@@ -1,3 +1,9 @@
 {
-    "prefix": "$"
+    "prefix": "$",
+
+    "fetchPageSize": 50, 
+    "fetchDelay": 500,
+    "fetchIterationsMax": 0,
+
+    "htmlDebugPath": "logs/debug.html"
 }

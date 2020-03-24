@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { fetchIterationsMax, fetchPageSize, fetchDelay, htmlDebugPath } = require('../configuration/config.json');
 const utils = require('../utils');
 
 const Discord = require('discord.js');
