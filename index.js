@@ -35,7 +35,7 @@ client.once('ready', () => {
 });
 
 
-client.on('message', message => {
+client.on('message', async message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).split(/ +/);
@@ -78,11 +78,11 @@ client.on('message', message => {
 
     try {
         logger.debug("Execute!");
-        command.execute(message, args);
+        await command.execute(message, args);
     } catch (error) {
         logger.error(`'${message.content}'`)
         logger.error(error.stack);
-        message.reply('there was an error trying to execute that command!');
+        await message.reply(error.message ? error.message : 'there was an error trying to execute that command!');
     }
 
     

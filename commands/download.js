@@ -25,66 +25,90 @@ module.exports = {
     args: true,
     usage: '[#channel, here, this] [@user, time]',
     
-	async execute(message, args) {
-
-        // const client = message.client;
-        
-        // Parse Arguments =================================================================
-
-        let channel = utils.getChannelFromMention(message, args[0]);
-        if (!channel && args[0].match(/(this|here)/)) channel = message.channel;
-        if (!channel) return message.reply("I don't see a channel mention, sorry!");
-        
-
-        let user;
-        if (args.length >= 2) {
-            user = utils.getUserFromMention(message, args[1]);
-            if (!user && utils.isRoleFromMention(args[1])) await message.reply("I don't know what to do with roles and bots. Ignoring that last bit!");
-            if (!user) await message.reply("I don't see a user mention, but thats fine I guess!");
-        }
-
-        // Reply with plain english understanding of command
-        let understanding = `I hear you want to scan messages `;
-        if (user) understanding += `posted by ${user} `
-        understanding += `on ${channel} `
-        if (false) understanding += `from the last x days ` // eslint-disable-line no-constant-condition
-        understanding += `for any and all attachments. One sec...`
-        logger.info(understanding);
-        await message.reply(understanding);
-
-
-        // Go Fetch =================================================================
-
+	async execute(_message, _args) {
 
         let initData = {
-            commandMessage: message,
+            commandMessage: _message,
+            commandMessageArgs: _args,
             statusMessage: null,
-
-            scanChannel: channel,
-            scanUser: user,
-
+        
+            scanChannel: null,
+            scanUser: null,
+        
             iterations: 0,
-            iterationsMax: 2, //HARDCODED
-
+            iterationsMax: fetchIterationsMax,
+            exhausted: false,
+        
             collectedTotal: 0,
             collectedFiltered() { return this.collectionFiltered.size },
             collectedFilteredDelta: 0,
             collectionFiltered: new Discord.Collection(),
-
+            
+            fetchDelay,
             nextFetchSettings: {
                 before: null,
-                limit: 50 //HARDCODED
+                limit: fetchPageSize
             },
-            fetchDelay: 500, //HARDCODED
-
-            exhausted: false
+            
+            html: null
         }
+
+        // Parse command arguments ======================================================
+        
+        const parseChannel = async (data) => {
+            if (data.scanChannel) return data;
+
+            const { commandMessage: m, commandMessageArgs: a } = data;
+
+            let c = utils.getChannelFromMention(m, a[0]);
+            if (!c && a[0].match(/(this|here)/)) c = m.channel;
+            if (!c) throw new Error("I don't see a channel mention, sorry!");
+            data.scanChannel = c;
+            return data;
+        }
+
+        const parseUser = async (data) => {
+            if (data.scanUser) return data;
+
+            const { commandMessage: m, commandMessageArgs: a } = data;
+
+            if (a.length < 2) return data;
+
+            let u = utils.getUserFromMention(m, a[1]);
+            if (!u && utils.isRoleFromMention(a[1])) {
+                await m.reply("I don't know what to do with roles and bots. Ignoring that last bit!");
+                return data;
+            }
+            if (!u) {
+                await m.reply("I don't see a user mention, but thats fine I guess!");
+                return data;
+            }
+            data.scanUser = u;
+            return data;
+        }
+
+        const spoutUnderstanding = async (data) => {
+            // Reply with plain english understanding of command
+            const { commandMessage: m, scanChannel: c, scanUser: u } = data;
+
+            let     s = `I hear you want to scan messages `;
+            if (u)  s += `posted by ${u} `
+                    s += `on ${c} `
+            if (0)  s += `from the last x days ` // eslint-disable-line no-constant-condition
+                    s += `for any and all attachments. One sec...`
+
+            logger.info(s);
+            await m.reply(s);
+
+            return data;
+        }
+
+        // Fetch data from message history! ===================================================
 
         const fetch = ( idata ) => {
             logger.debug("Fetch! " + (idata.iterations+1));
             
             return idata.scanChannel.messages.fetch(idata.nextFetchSettings)
-            // .then(messages => data.commandMessage.reply(`I see ${messages.size} results here!`))
             .then(async messages => {
                 let data = idata;
                 data.iterations++;
@@ -130,88 +154,94 @@ module.exports = {
                     };
                 });
             })
-            // .then(sleeper(idata.fetchDelay))
             .then(({ data }) => {
                 if (data.exhausted) return data;
                 if (data.iterationsMax) if (data.iterations >= data.iterationsMax) return data;
-                return utils.sleep(data.fetchDelay)
-                .then(() => fetch(data)); // Else lets go for another round
+                return utils.sleep(data.fetchDelay).then(() => fetch(data)); // Else lets go for another round
             });
 
         }
 
 
-        let results = await fetch(initData).catch(e => logger.error(e.stack));
-
-
         // Prepare for export ====================================================================
 
-        /*
-            https://superuser.com/questions/268278/utility-to-download-and-rename-a-bunch-of-files
-            https://superuser.com/questions/274276/what-program-can-i-use-to-bulk-download-this-list-of-links
-        */
-
-        const { 
-            commandMessage, 
-            scanChannel, 
-            scanUser, 
-            collectionFiltered: messages 
-        } = results;
-
-        let allAttachments = new Discord.Collection();
-
-        messages.each((m, sfm, allm) => {
-            const { attachments, embeds, author, createdAt } = m;
-
-            let username = author.username.replace(/[^\w-]+/g, "") || author.tag;
-            const createdString = moment(createdAt).format("YYYYMMDD-HHmmss");
-
-            const ingestAttachmentEmbed = (key, url) => {
-                let basename = path.basename( urlLib.parse(url).pathname );
-                basename = basename.replace(/^(SPOILER_)/, "");
-                const newname = `${username}_${createdString}_${basename}`;
-
-                allAttachments.set(key, {
-                    author,
-                    url,
-                    createdAt,
-                    basename,
-                    newname
-                })
-            };
-
-            attachments.each((a, sfa, alla) => ingestAttachmentEmbed(sfa, a.url));
-
-            embeds.forEach((e, i, alle) => {
-                const { type, url } = e;
-                const garbageSnowflake = sfm + `-embed-${i}`;
-                if (new RegExp("image|video").test(type) && url) ingestAttachmentEmbed(garbageSnowflake, url);
+        const buildLinkCollection = async (data) => {
+            if (!data.collectionFiltered) throw new Error("No collection of embeds and attachments to parse!");
+            if (!data.collectionFiltered.size) throw new Error("No collection of embeds and attachments to parse!");
+            
+            const messages = data.collectionFiltered;
+    
+            let allAttachments = new Discord.Collection();
+    
+            messages.each((m, sfm, allm) => {
+                const { attachments, embeds, author, createdAt } = m;
+    
+                let username = author.username.replace(/[^\w-]+/g, "") || author.tag;
+                const createdString = moment(createdAt).format("YYYYMMDD-HHmmss");
+    
+                const ingestAttachmentEmbed = (key, url) => {
+                    let basename = path.basename( urlLib.parse(url).pathname );
+                    basename = basename.replace(/^(SPOILER_)/, "");
+                    const newname = `${username}_${createdString}_${basename}`;
+    
+                    allAttachments.set(key, {
+                        author,
+                        url,
+                        createdAt,
+                        basename,
+                        newname
+                    })
+                };
+    
+                attachments.each((a, sfa, alla) => ingestAttachmentEmbed(sfa, a.url));
+    
+                embeds.forEach((e, i, alle) => {
+                    const { type, url } = e;
+                    const garbageSnowflake = sfm + `-embed-${i}`;
+                    if (new RegExp("image|video").test(type) && url) ingestAttachmentEmbed(garbageSnowflake, url);
+                });
             });
-        })
 
 
+            if (!allAttachments.size) throw new Error("Our processed collection of embeds and attachments is empty!")
+            data.collectionFiltered = allAttachments;
+            return data;
+        }
 
-        let html2 = buildDownloadHtml({
-            scanChannel,
-            scanUser,
-            moment,
-            attachments: Array.from(allAttachments.values())
-        })
+        const buildDownloadHtml = (data) => {
+            const {scanChannel, scanUser, collectionFiltered} = data;
+            data.html = pugRender({
+                scanChannel,
+                scanUser,
+                moment,
+                attachments: Array.from(collectionFiltered.values())
+            })
+            return data;
+        }
 
+        const distributeHTMLData = (data) => {
+            const {html, commandMessage, scanChannel} = data;
+            if (!html) throw new Error("There was no html generated.");
+
+            const htmlData = Buffer.from(data.html);
+            return fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
+            .then(() => logger.debug(`Deliverable HTML saved to ${htmlDebugPath}!`))
+            .then(() => {
+                const attachment = new Discord.MessageAttachment(htmlData, `${scanChannel.name}-attachments.html`);
+                return commandMessage.reply(`here you go!`, attachment)
+            })
+            .then(() => data);
+        }
         
+        // RUN ALL =====================================================================================
 
-        const htmlData = Buffer.from(html2);
-
-        fsp.writeFile("logs/debug.html", htmlData, 'utf8')
-        .then(() => console.log("Message data saved!"))
-        .catch(error => console.log(error));
-
-
-        const attachment = new Discord.MessageAttachment(htmlData, `${scanChannel.name}-attachments.html`);
-        commandMessage.reply(`here you go!`, attachment);
-
-
-        // if (message.mentions.users include me)
+        return parseChannel(initData)
+        .then(parseUser)
+        .then(spoutUnderstanding)
+        .then(fetch)
+        .then(buildLinkCollection)
+        .then(buildDownloadHtml)
+        .then(distributeHTMLData)
 	},
 };
 
