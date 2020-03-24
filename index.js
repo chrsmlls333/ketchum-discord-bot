@@ -10,7 +10,8 @@
 
 const Discord = require('discord.js');
 
-const { prefix, token } = require('./configuration/config.json');
+const { token } = require('./configuration/token.json');
+const { prefix } = require('./configuration/config.json');
 const logger = require('./configuration/logConfig');
 
 const client = new Discord.Client();
