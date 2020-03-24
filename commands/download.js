@@ -1,16 +1,16 @@
 const Discord = require('discord.js');
 const utils = require('../utils');
+
+const Discord = require('discord.js');
 const logger = require('winston');
-
 const moment = require('moment');
-
 const path = require('path');
 const urlLib = require('url');
+const fsp = require('fs').promises;
 
 const pug = require('pug');
-const buildDownloadHtml = pug.compileFile('templates/download.pug');
+const pugRender = pug.compileFile('templates/download.pug');
 
-const fsp = require('fs').promises;
 
 
 module.exports = {
