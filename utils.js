@@ -31,18 +31,31 @@ const utils = {
 
     // Messaging / Editing
 
-    replyOrEdit: (originalMessage, newMessage, content) => {
+    replyOrEdit: async (originalMessage, newMessage, content, checkWasReply = true) => {
         if (!newMessage) return originalMessage.reply(content);
         if (!newMessage.editable) return newMessage;
-
-        const searchTerm = '>, ';
-        const i = newMessage.content.indexOf(searchTerm) + searchTerm.length;
-        const before = newMessage.content.slice(0, i);
-        const after = newMessage.content.slice(i);
-        return newMessage.edit(before + content);
+        if (checkWasReply) {
+            const tokens = newMessage.content.split(/[, ]+/);
+            const firstToken = tokens.shift();
+            const wasReply = firstToken.match(utils.USER_REGEX);
+            if (wasReply) content = `${firstToken}, ${content}`;
+        }
+        return newMessage.edit(content);
     },
 
-    appendEdit: (message, content) => {
+    sendOrEdit: async (channel, newMessage, content, checkWasReply = true) => {
+        if (!newMessage) return channel.send(content);
+        if (!newMessage.editable) return newMessage;
+        if (checkWasReply) {
+            const tokens = newMessage.content.split(/[, ]+/);
+            const firstToken = tokens.shift();
+            const wasReply = firstToken.match(utils.USER_REGEX);
+            if (wasReply) content = `${firstToken}, ${content}`;
+        }
+        return newMessage.edit(content);
+    },
+
+    appendEdit: async (message, content) => {
         if (!message) return message;
         if (!message.editable) return message;
         return message.edit(message.content + content);
