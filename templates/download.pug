@@ -20,6 +20,12 @@ html(lang="en")
                 border-top-left-radius: 0.25rem;
                 border-bottom-right-radius: 0.25rem;
             }
+            .table-responsive {
+                white-space: nowrap;
+            }
+            .min-col-size {
+                width: 0.1px;
+            }
     body
         .container-fluid
             .card.mt-3
@@ -59,18 +65,18 @@ html(lang="en")
                     table.table.table-striped.table-bordered.table-sm
                         thead
                             tr
-                                th(scope="col") #
+                                th(scope="col").min-col-size #
+                                th(scope="col") Posted
                                 th(scope="col") User
                                 th(scope="col") File
-                                th(scope="col") Posted
-                                th(scope="col" style="width:1em;") Link
+                                th(scope="col").min-col-size Link
                         tbody
                             each a, i in attachments
                                 tr  
                                     th(scope="row")= i + 1
+                                    td= moment(a.createdAt).format("YYYY/MM/DD")
                                     td= a.author.tag
                                     td= a.basename
-                                    td= moment(a.createdAt).format("YYYY/MM/DD")
                                     td.text-center
                                         a(href=a.url title=a.newname target='_blank') 💾
 
