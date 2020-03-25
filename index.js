@@ -80,7 +80,7 @@ client.on('message', async message => {
         logger.debug("Execute!");
         await command.execute(message, args);
     } catch (error) {
-        logger.error(`'${message.content}'`)
+    // if (error.message) logger.error(error.message);
         logger.error(error.stack);
         await message.reply(error.message ? error.message : 'there was an error trying to execute that command!');
     }
