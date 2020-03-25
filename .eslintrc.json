@@ -1,5 +1,5 @@
 {
-	"extends": "eslint:recommended",
+	"extends": "airbnb",
 	"env": {
 		"node": true,
 		"es6": true
@@ -8,6 +8,13 @@
 		"ecmaVersion": 2019
 	},
 	"rules": {
-		"no-unused-vars": ["error", { "args": "none" }]
+		"arrow-parens":"off",
+		"no-plusplus":"off",
+		"no-trailing-spaces":"off",
+		"no-unused-vars":"warn",
+		"operator-linebreak":["error", "after"],
+		"padded-blocks":"off", 
+		"quotes":["error", "single", {"allowTemplateLiterals": true, "avoidEscape": true}],
+		"import/newline-after-import":"off"
 	}
 }
