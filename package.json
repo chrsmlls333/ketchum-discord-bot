@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
+    "debug": "node --no-lazy --inspect-brk=9229 index.js",
     "start:pm2": "pm2 start index.js --name 'discord-downloader' --watch --ignore-watch='node_modules logs'; pm2 monit",
     "stop:pm2": "pm2 stop 'discord-downloader'",
     "peek:pm2": "pm2 monit",
