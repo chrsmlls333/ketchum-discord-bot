@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable prefer-arrow-callback */
 /* eslint-disable no-param-reassign */
 
 const Discord = require('discord.js');
@@ -38,8 +40,9 @@ module.exports = {
       commandMessageArgs: _args,
       statusMessage: null,
     
-      scanChannel: null,
-      scanUser: null,
+      scanChannels: null,
+      currentChannelID: null,
+      scanUsers: null,
     
       iterations: 0,
       iterationsMax: fetchIterationsMax,
@@ -62,52 +65,72 @@ module.exports = {
     // Parse command arguments ======================================================
     
     const parseChannel = async (data) => {
-      if (data.scanChannel) return data;
+      const { scanChannels, commandMessage: m, commandMessageArgs: a } = data;
+      if (scanChannels) return data;
+      if (!a.length) return data;
 
-      const { commandMessage: m, commandMessageArgs: a } = data;
+      const channelsFound = new Discord.Collection();
+      while (a.length) {
+        const arg = a[0];
+        let c = utils.getChannelFromMention(m, arg);
+        if (!c && arg.match(/(this|here)/)) c = m.channel;
+        if (!c) break; // Nothing found
+        channelsFound.set(c.id, c);
+        a.shift();
+      }
 
-      let c = utils.getChannelFromMention(m, a[0]);
-      if (!c && a[0].match(/(this|here)/)) c = m.channel;
-      if (!c) throw new Error("I don't see a channel mention, sorry!");
-      data.scanChannel = c;
-      return data;
+      if (!channelsFound.size) throw new Error("I don't see a channel mention, sorry!");
+      logger.info(channelsFound.size);
+      return {
+        ...data,
+        scanChannels: channelsFound,
+        commandMessageArgs: a,
+      };
     };
 
     const parseUser = async (data) => {
-      if (data.scanUser) return data;
+      const { scanUsers, commandMessage: m, commandMessageArgs: a } = data;
+      if (scanUsers) return data;
+      if (!a.length) return data;
 
-      const { commandMessage: m, commandMessageArgs: a } = data;
-
-      if (a.length < 2) return data;
-
-      const u = utils.getUserFromMention(m, a[1]);
-      if (!u && utils.isRoleFromMention(a[1])) {
-        await m.reply("I don't know what to do with roles and bots. Ignoring that last bit!");
-        return data;
+      const usersFound = new Discord.Collection();
+      while (a.length) {
+        const arg = a[0];
+        const u = utils.getUserFromMention(m, arg);
+        if (!u) {
+          if (utils.isRoleFromMention(arg)) m.reply("I don't know what to do with roles and bots. Ignoring that bit!");
+          break;
+        }
+        usersFound.set(u.id, u);
+        a.shift();
       }
-      if (!u) {
+      
+      if (!usersFound.size) {
         await m.reply("I don't see a user mention, but thats fine I guess!");
         return data;
       }
-      data.scanUser = u;
+      data.scanUsers = usersFound;
+      
+      data.commandMessageArgs = a;
       return data;
     };
 
+    // const parseTime
+
     const spoutUnderstanding = async (data) => {
       // Reply with plain english understanding of command
-      const { commandMessage: m, scanChannel: c, scanUser: u } = data;
+      const { commandMessage: m, scanChannels: c, scanUsers: u } = data;
 
-      
       /* eslint-disable no-multi-spaces, indent, no-constant-condition */
       let     s =  `I hear you want to scan messages `;
-      if (u)  s += `posted by ${u} `;
-              s += `on ${c} `;
+      if (u)  s += `posted by ${[...u.values()].join(' & ')} `;
+              s += `on ${[...c.values()].join(' & ')} `;
       if (0)  s += `from the last x days `;
               s += `for any and all attachments. One sec...`;
       /* eslint-enable no-multi-spaces, indent, no-constant-condition */
 
-      logger.info(s);
-      await m.reply(s);
+      const spoutMessage = await m.reply(s);
+      logger.info(spoutMessage.cleanContent);
       return data;
     };
 
@@ -116,7 +139,7 @@ module.exports = {
     const fetch = (idata) => {
       logger.debug(`Fetch! ${idata.iterations + 1}`);
       
-      return idata.scanChannel.messages.fetch(idata.nextFetchSettings)
+      return idata.scanChannels.messages.fetch(idata.nextFetchSettings)
         .then(async messages => {
           const data = idata;
           data.iterations++;
@@ -144,7 +167,7 @@ module.exports = {
             return false;
           }); 
           
-          if (data.scanUser)newFiltered = newFiltered.filter(m => m.author.id === data.scanUser.id);
+          if (data.scanUsers) newFiltered = newFiltered.filter(m => m.author.id === data.scanUsers.id);
 
           // UPDATE DATA
           data.collectedTotal += messages.size;
@@ -190,6 +213,7 @@ module.exports = {
           createdAt,
           attachments, 
           embeds, 
+          guild,
         } = m;
   
         const username = author.username.replace(/[^\w-]+/g, '') || author.tag;
@@ -201,6 +225,7 @@ module.exports = {
           const newname = `${username}_${createdString}_${basename}`;
   
           allAttachments.set(key, {
+            guild,
             author,
             url,
             createdAt,
@@ -226,15 +251,15 @@ module.exports = {
 
     const buildDownloadHtml = (data) => {
       const {
-        scanChannel, 
-        scanUser, 
+        scanChannels, 
+        scanUsers, 
         collectionFiltered,
       } = data;
       data.html = pugRender({
-        scanChannel,
-        scanUser,
+        scanChannels,
+        scanUsers,
         moment,
-        attachments: Array.from(collectionFiltered.values()),
+        attachments: [...collectionFiltered.values()],
       });
       return data;
     };
@@ -243,7 +268,7 @@ module.exports = {
       const {
         html, 
         commandMessage, 
-        scanChannel,
+        scanChannels,
       } = data;
       if (!html) throw new Error('There was no html generated.');
 
@@ -251,7 +276,7 @@ module.exports = {
       return fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
         .then(() => logger.debug(`Deliverable HTML saved to ${htmlDebugPath}!`))
         .then(() => {
-          const attachment = new Discord.MessageAttachment(htmlData, `${scanChannel.name}-attachments.html`);
+          const attachment = new Discord.MessageAttachment(htmlData, `${scanChannels.name}-attachments.html`);
           return commandMessage.reply(`here you go!`, attachment);
         })
         .then(() => data);
@@ -262,6 +287,11 @@ module.exports = {
     return parseChannel(initData)
       .then(parseUser)
       .then(spoutUnderstanding)
+      .then(data => ({
+        ...data,
+        scanChannels: data.scanChannels && [...data.scanChannels.values()][0],
+        scanUsers: data.scanUsers && [...data.scanUsers.values()][0],
+      }))
       .then(fetch)
       .then(buildLinkCollection)
       .then(buildDownloadHtml)

@@ -4,7 +4,11 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         meta(http-equiv="X-UA-Compatible", content="ie=edge")
-        title Document
+
+        - const channelstring = `<u>${scanChannel.guild.name}#${scanChannel.map(c => c.name).join('&')}</u>`;
+        - const userstring = scanUser ? ` by <u>${scanUser.map(u => u.tag).join('&')}</u>` : '';
+        - const titlestring = `📦 Images/Files posted in ${channelstring}${userstring}`;
+        title= titlestring
 
         link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css' integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh' crossorigin='anonymous')
         style. 
@@ -31,9 +35,9 @@ html(lang="en")
             .card.mt-3
                 .card-horizontal
                     .img-square-wrapper
-                        img#serverIcon(src=scanChannels.guild.iconURL({ format: "jpg", dynamic: true, size: 128 }))
+                        img#serverIcon(src=scanChannel.guild.iconURL({ format: "jpg", dynamic: true, size: 128 }))
                     .card-body
-                        h4#title.card-title.mb-4!= `📦 Images/Files posted in <u>${scanChannels.guild.name}#${scanChannels.name}</u>${scanUsers ? ` by <u>${scanUsers.tag}</u>`: ""}`
+                        h4#title.card-title.mb-4!= titlestring
                         hr
                         .alert.alert-light.mt-4.p-0
                             h4.alert-heading 🔖 Instructions
@@ -67,7 +71,6 @@ html(lang="en")
                             tr
                                 th(scope="col").min-col-size #
                                 th(scope="col") Posted
-                                th(scope="col") Server
                                 th(scope="col") User
                                 th(scope="col") File
                                 th(scope="col").min-col-size Link
@@ -76,7 +79,6 @@ html(lang="en")
                                 tr  
                                     th(scope="row")= i + 1
                                     td= moment(a.createdAt).format("YYYY/MM/DD")
-                                    td= a.guild.available && a.guild.name
                                     td= a.author.tag
                                     td= a.basename
                                     td.text-center
