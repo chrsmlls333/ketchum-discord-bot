@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
-    "debug": "node --no-lazy --inspect-brk=9229 index.js",
+    "debug": "nodemon --inspect",
     "start:pm2": "pm2 start index.js --name 'discord-downloader' --watch --ignore-watch='node_modules logs'; pm2 monit",
     "stop:pm2": "pm2 stop 'discord-downloader'",
     "peek:pm2": "pm2 monit",
@@ -24,5 +24,15 @@
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.1.0",
     "eslint-plugin-import": "^2.20.1"
+  },
+  "nodemonConfig": {
+    "restartable": "rs",
+    "ignore": [
+      ".git",
+      "node_modules/**/node_modules",
+      "logs"
+    ],
+    "verbose": true,
+    "ext": "js,json,pug"
   }
 }
