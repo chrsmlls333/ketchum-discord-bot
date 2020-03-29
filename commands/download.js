@@ -241,6 +241,11 @@ module.exports = {
         // stop cancel watch
         cancelCollector.stop();
 
+        // delete all statusMessages 
+        // const statusMessages = fetchResults.map(f => f.statusMessage);
+        // eslint-disable-next-line max-len
+        // setTimeout(() => data.commandMessage.channel.bulkDelete(statusMessages), statusMessageDeleteDelay);
+
         // combine results
         data.collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
         const filteredEach = fetchResults.map(f => f.collectionFiltered);
