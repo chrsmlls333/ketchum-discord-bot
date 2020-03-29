@@ -31,33 +31,21 @@ module.exports = {
   guildOnly: true,
 
   args: true,
-  usage: '[#channel, here, this] [@user, time]',
+  usage: '[...#channel, here, this, all, any] [...@user, time]',
   
   async execute(_message, _args) {
 
     const initData = {
       commandMessage: _message,
       commandMessageArgs: _args,
-      statusMessage: null,
     
       scanChannels: null,
-      currentChannelID: null,
+      allChannels: false,
       scanUsers: null,
-    
-      iterations: 0,
-      iterationsMax: fetchIterationsMax,
-      exhausted: false,
-    
+
+      collectionLoadedMessages: null,
+      collectionMedia: null,
       collectedTotal: 0,
-      collectedFiltered() { return this.collectionFiltered.size; },
-      collectedFilteredDelta: 0,
-      collectionFiltered: new Discord.Collection(),
-      
-      fetchDelay,
-      nextFetchSettings: {
-        before: null,
-        limit: fetchPageSize,
-      },
       
       html: null,
     };
@@ -73,13 +61,21 @@ module.exports = {
       while (a.length) {
         const arg = a[0];
         let c = utils.getChannelFromMention(m, arg);
-        if (!c && arg.match(/(this|here)/)) c = m.channel;
+        if (!c && arg.match(/^(this|here)$/i)) c = m.channel;
+        if (!c && arg.match(/^(all|any)$/i)) {
+          if (m.channel.type === 'dm') throw new Error("I really can't do this in a DM!");
+          if (!m.channel.guild.available) throw new Error("I don't see your server!");
+          data.allChannels = true;
+          const textChannels = m.channel.guild.channels.cache.filter(gc => gc.type === 'text' && !gc.deleted && gc.viewable);
+          textChannels.each((chan) => channelsFound.set(chan.id, chan));
+          c = textChannels.first(); // To appease current if/else structure
+        }
         if (!c) break; // Nothing found
         channelsFound.set(c.id, c);
-        a.shift();
+        a.shift(); 
       }
 
-      if (!channelsFound.size) throw new Error("I don't see a channel mention, sorry!");
+      if (!channelsFound.size) throw new Error("I don't see a channel mention, or all/here/this, sorry!");
       logger.info(channelsFound.size);
       return {
         ...data,
@@ -119,12 +115,12 @@ module.exports = {
 
     const spoutUnderstanding = async (data) => {
       // Reply with plain english understanding of command
-      const { commandMessage: m, scanChannels: c, scanUsers: u } = data;
+      const { commandMessage: m, scanChannels: c, scanUsers: u, allChannels: all } = data;
 
       /* eslint-disable no-multi-spaces, indent, no-constant-condition */
       let     s =  `I hear you want to scan messages `;
       if (u)  s += `posted by ${[...u.values()].join(' & ')} `;
-              s += `on ${[...c.values()].join(' & ')} `;
+              s += `on ${all ? 'all channels ' : [...c.values()].join(' & ')} `;
       if (0)  s += `from the last x days `;
               s += `for any and all attachments. One sec...`;
       /* eslint-enable no-multi-spaces, indent, no-constant-condition */
@@ -136,130 +132,150 @@ module.exports = {
 
     // Fetch data from message history! ===================================================
 
-    const fetch = (idata) => {
-      logger.debug(`Fetch! ${idata.iterations + 1}`);
-      
-      return idata.scanChannels.messages.fetch(idata.nextFetchSettings)
-        .then(async messages => {
-          const data = idata;
-          data.iterations++;
+    const fetch = (fetchData) => fetchData.scanChannels.get(fetchData.currentChannelID).messages
+      .fetch({ before: fetchData.earliestSnowflake, limit: fetchPageSize })
+      .then(async messages => {
+        const i = ++fetchData.iterations;
+        logger.debug(`Fetch! ${i}`);
+        
 
-          // CHECK FOR NOTHING
-          if (!messages.size) {
-            data.exhausted = true;
-            return utils.appendEdit(data.statusMessage, ` Finished!`)
-              .then(message => {
-                logger.info(message.cleanContent);
-                data.statusMessage = message;
-                return { data };
-              });
-          }
-
-          // GET EARLIEST
-          const earliestTimestamp = messages.map(m => m.createdTimestamp)
-            .reduce((min, cur) => Math.min(min, cur), Infinity);
-          const earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
-
-          // FILTER
-          let newFiltered = messages.filter(m => { // make sure at least one attachment or embed
-            if (m.attachments.size) return true;
-            if (m.embeds.length) return m.embeds.some(e => new RegExp('image|video').test(e.type));
-            return false;
-          }); 
-          
-          if (data.scanUsers) newFiltered = newFiltered.filter(m => m.author.id === data.scanUsers.id);
-
-          // UPDATE DATA
-          data.collectedTotal += messages.size;
-          const collectedFilteredLast = data.collectedFiltered();
-          data.collectionFiltered = data.collectionFiltered.concat(newFiltered);
-          data.collectedFilteredDelta = data.collectedFiltered() - collectedFilteredLast;
-          data.nextFetchSettings.before = earliestSnowflake;
-          
-          // REPORT
-          return utils.replyOrEdit(data.commandMessage, data.statusMessage, 
-            `I see ${data.collectedFiltered()}/${data.collectedTotal} results here from ${data.iterations}${data.iterationsMax ? `/${data.iterationsMax}` : ''} pass${data.iterations !== 1 ? 'es' : ''}!`)
+        // CHECK FOR NOTHING
+        if (!messages.size) {
+          fetchData.exhausted = true;
+          return utils.appendEdit(fetchData.statusMessage, ` Finished!`)
             .then(message => {
-              data.statusMessage = message;
-              return {
-                messages,
-                data,
-              };
+              logger.info(message.cleanContent);
+              fetchData.statusMessage = message;
+              return fetchData;
             });
-        })
-        .then(({ data }) => {
-          if (data.exhausted) return data;
-          if (data.iterationsMax) if (data.iterations >= data.iterationsMax) return data;
-          // else lets go for another round
-          return utils.sleep(data.fetchDelay).then(() => fetch(data)); 
-        });
+        }
+
+        // GET EARLIEST
+        const earliestTimestamp = messages.map(m => m.createdTimestamp)
+          .reduce((min, cur) => Math.min(min, cur), Infinity);
+        fetchData.earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
+
+        // FILTER
+        let newFiltered = messages.filter(m => { // make sure at least one attachment or embed
+          if (m.attachments.size) return true;
+          if (m.embeds.length) return m.embeds.some(e => new RegExp('image|video').test(e.type));
+          return false;
+        }); 
+        
+        if (fetchData.scanUsers && fetchData.scanUsers.size) {
+          newFiltered = newFiltered.filter(m => fetchData.scanUsers.some(u => u.id === m.author.id));
+        }
+
+        // UPDATE DATA
+        fetchData.collectedTotal += messages.size;
+        const { size: last } = fetchData.collectionFiltered;
+        fetchData.collectionFiltered = fetchData.collectionFiltered.concat(newFiltered);
+        const { size } = fetchData.collectionFiltered;
+        const delta = size - last;
+        
+        // REPORT
+        return utils.replyOrEdit(fetchData.commandMessage, fetchData.statusMessage, 
+          `for ${fetchData.scanChannels.get(fetchData.currentChannelID)} I see ${size}/${fetchData.collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
+          .then(message => {
+            fetchData.statusMessage = message;
+            return fetchData;
+          });
+      })
+      .then(d => {
+        if (d.exhausted) return d;
+        if (fetchIterationsMax) if (d.iterations >= fetchIterationsMax) return d;
+        // else lets go for another round
+        return utils.sleep(fetchDelay).then(() => fetch(d)); 
+      });
+
+
+    const fetchChannelsCombine = (data) => {
+
+      const fetches = data.scanChannels.map((c, k) => {
+        const fetchInitData = {
+          commandMessage: data.commandMessage,
+          commandMessageArgs: data.commandMessageArgs,
+          statusMessage: null,
+          
+          scanChannels: data.scanChannels && data.scanChannels.clone(),
+          currentChannelID: k,
+          scanUsers: data.scanUsers && data.scanUsers,
+        
+          iterations: 0,
+          exhausted: false,
+          
+          collectedTotal: 0,
+          collectionFiltered: new Discord.Collection(),
+          
+          earliestSnowflake: null,
+        };
+
+        return fetch(fetchInitData);
+      });
+
+      return Promise.all(fetches).then(fetchResults => {
+        data.collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
+        const filteredEach = fetchResults.map(f => f.collectionFiltered);
+        data.collectionLoadedMessages = new Discord.Collection().concat(...filteredEach);
+        return data;
+      });
 
     };
 
 
     // Prepare for export ====================================================================
 
-    const buildLinkCollection = async (data) => {
-      if (!data.collectionFiltered) throw new Error('No collection of embeds and attachments to parse!');
-      if (!data.collectionFiltered.size) throw new Error('No collection of embeds and attachments to parse!');
+    const buildLinkCollection = (data) => {
+      if (!data.collectionLoadedMessages && !data.collectionLoadedMessages.size) throw new Error('No collection of embeds and attachments to parse!');
       
-      const messages = data.collectionFiltered;
-  
+      const messages = data.collectionLoadedMessages;
       const allAttachments = new Discord.Collection();
   
       messages.each((m, sfm) => {
-        const { 
-          author, 
-          createdAt,
-          attachments, 
-          embeds, 
-          guild,
-        } = m;
-  
-        const username = author.username.replace(/[^\w-]+/g, '') || author.tag;
-        const createdString = moment(createdAt).format('YYYYMMDD-HHmmss');
-  
+
         const ingestAttachmentEmbed = (key, url) => {
+          const username = m.author.username.replace(/[^\w-]+/g, '') || m.author.tag;
+          const createdString = moment(m.createdAt).format('YYYYMMDD-HHmmss');
           let basename = path.basename(urlLib.parse(url).pathname);
           basename = basename.replace(/^(SPOILER_)/, '');
-          const newname = `${username}_${createdString}_${basename}`;
+          // const newname = `#${m.channel.name}/${username}_${createdString}_${basename}`;
+          const newname = path.join(`${m.guild.name}`, `#${m.channel.name}`, `${username}_${createdString}_${basename}`);
   
           allAttachments.set(key, {
-            guild,
-            author,
-            url,
-            createdAt,
+            message: m,
             basename,
             newname,
+            url,
           });
         };
   
-        attachments.each((a, sfa) => ingestAttachmentEmbed(sfa, a.url));
+        m.attachments.each((a, sfa) => ingestAttachmentEmbed(sfa, a.url));
   
-        embeds.forEach((e, i) => {
-          const { type, url } = e;
+        m.embeds.forEach((e, i) => {
           const garbageSnowflake = `${sfm}-embed-${i}`;
-          if (new RegExp('image|video').test(type) && url) ingestAttachmentEmbed(garbageSnowflake, url);
+          if (new RegExp('image|video').test(e.type) && e.url) ingestAttachmentEmbed(garbageSnowflake, e.url);
         });
       });
 
-
       if (!allAttachments.size) throw new Error('Our processed collection of embeds and attachments is empty!');
-      data.collectionFiltered = allAttachments;
+      data.collectionMedia = allAttachments;
       return data;
     };
 
     const buildDownloadHtml = (data) => {
       const {
-        scanChannels, 
-        scanUsers, 
-        collectionFiltered,
+        scanChannels,
+        allChannels: all,
+        scanUsers,
+        collectionMedia,
       } = data;
       data.html = pugRender({
-        scanChannels,
-        scanUsers,
+        server: scanChannels.first().guild.name,
+        iconURL: scanChannels.first().guild.iconURL({ format: 'jpg', dynamic: true, size: 128 }),
+        channels: all ? 'all' : scanChannels.map(c => c.name).join('&#'),
+        users: (scanUsers && scanUsers.size) ? scanUsers.map(u => u.tag).join(' & ') : null,
         moment,
-        attachments: [...collectionFiltered.values()],
+        attachments: [...collectionMedia.values()],
       });
       return data;
     };
@@ -269,14 +285,16 @@ module.exports = {
         html, 
         commandMessage, 
         scanChannels,
+        allChannels: all,
       } = data;
-      if (!html) throw new Error('There was no html generated.');
 
-      const htmlData = Buffer.from(data.html);
+      if (!html) throw new Error('There was no html generated.');
+      const htmlData = Buffer.from(html);
+
       return fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
         .then(() => logger.debug(`Deliverable HTML saved to ${htmlDebugPath}!`))
         .then(() => {
-          const attachment = new Discord.MessageAttachment(htmlData, `${scanChannels.name}-attachments.html`);
+          const attachment = new Discord.MessageAttachment(htmlData, `${all ? 'all' : scanChannels.map(c => c.name).join('_')}_attachments.html`);
           return commandMessage.reply(`here you go!`, attachment);
         })
         .then(() => data);
@@ -284,15 +302,17 @@ module.exports = {
     
     // RUN ALL =====================================================================================
 
-    return parseChannel(initData)
+    return Promise.resolve(initData)
+      .then(parseChannel)
       .then(parseUser)
       .then(spoutUnderstanding)
-      .then(data => ({
-        ...data,
-        scanChannels: data.scanChannels && [...data.scanChannels.values()][0],
-        scanUsers: data.scanUsers && [...data.scanUsers.values()][0],
-      }))
-      .then(fetch)
+      // .then(data => ({
+      //   ...data,
+      //   scanChannels: data.scanChannels && [...data.scanChannels.values()][0],
+      //   scanUsers: data.scanUsers && [...data.scanUsers.values()][0],
+      // }))
+      // .then(fetch)
+      .then(fetchChannelsCombine)
       .then(buildLinkCollection)
       .then(buildDownloadHtml)
       .then(distributeHTMLData);
