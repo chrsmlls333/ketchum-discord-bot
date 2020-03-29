@@ -14,6 +14,7 @@ const pugRender = pug.compileFile('templates/download.pug');
 
 const utils = require('../utils');
 const {
+  anonymous,
   fetchIterationsMax, 
   fetchPageSize, 
   fetchDelay, 
@@ -303,6 +304,7 @@ module.exports = {
         users: (scanUsers && scanUsers.size) ? scanUsers.map(u => u.tag).join(' & ') : null,
         moment,
         attachments: [...collectionMedia.values()],
+        anonymous,
       });
       return data;
     };

@@ -1,10 +1,12 @@
 {
     "prefix": "$",
+    "anonymous": true,
 
     "fetchPageSize": 50, 
     "fetchDelay": 100,
     "fetchIterationsMax": 0,
 
+    "embedColor": [0, 0, 255],
     "statusMessageDeleteDelay": 7000,
 
     "htmlDebugPath": "logs/debug.html"

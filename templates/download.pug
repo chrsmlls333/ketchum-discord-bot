@@ -46,7 +46,7 @@ html(lang="en")
                                 code *title*
                                 |  as your Mask 🏷️ to rename the file with the username, posting date, and original filename.
                 .card-footer
-                    small.text-muted= `Scanned ${moment().format("MMMM Do YYYY, h:mm:ss a")} by Ketchum bot for Discord`
+                    small.text-muted= `Scanned ${moment().format("MMMM Do YYYY, h:mm:ss a")}${anonymous ? '' : ' by Ketchum bot for Discord'}`
                         
 
             if attachments
