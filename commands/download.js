@@ -306,12 +306,6 @@ module.exports = {
       .then(parseChannel)
       .then(parseUser)
       .then(spoutUnderstanding)
-      // .then(data => ({
-      //   ...data,
-      //   scanChannels: data.scanChannels && [...data.scanChannels.values()][0],
-      //   scanUsers: data.scanUsers && [...data.scanUsers.values()][0],
-      // }))
-      // .then(fetch)
       .then(fetchChannelsCombine)
       .then(buildLinkCollection)
       .then(buildDownloadHtml)
