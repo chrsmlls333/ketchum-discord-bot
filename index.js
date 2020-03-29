@@ -39,16 +39,14 @@ client.on('ready', async () => {
   logger.info(`I am ready! Logged in as ${client.user.tag}!`);
   logger.info(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`); 
 
-  client.user.setActivity('the upright organ');
+  // client.user.setActivity('the upright organ');
   client.generateInvite([
     'ADD_REACTIONS',
     'VIEW_CHANNEL',
     'SEND_MESSAGES', 
-    'MANAGE_MESSAGES',
     'EMBED_LINKS',
     'ATTACH_FILES',
     'READ_MESSAGE_HISTORY', 
-    'MENTION_EVERYONE',
     'CHANGE_NICKNAME',
   ])
     .then(link => {
