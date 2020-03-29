@@ -1,13 +1,3 @@
-/*
-  Discord-Downloader
-  written by Chris Eugene Mills 
-  March 2020
-
-  Pulls data and files from Discord
-*/
-
-// =========================================
-
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
