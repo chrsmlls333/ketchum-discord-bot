@@ -31,9 +31,26 @@ const cooldowns = new Discord.Collection();
 // =========================================
 
 
-client.once('ready', () => {
-  logger.info('Ready!');
-  // client.user.setActivity('the thread!', { type: 'WATCHING' });
+client.on('ready', async () => {
+  logger.info(`I am ready! Logged in as ${client.user.tag}!`);
+  logger.info(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`); 
+
+  client.user.setActivity('the upright organ');
+  client.generateInvite([
+    'ADD_REACTIONS',
+    'VIEW_CHANNEL',
+    'SEND_MESSAGES', 
+    'MANAGE_MESSAGES',
+    'EMBED_LINKS',
+    'ATTACH_FILES',
+    'READ_MESSAGE_HISTORY', 
+    'MENTION_EVERYONE',
+    'CHANGE_NICKNAME',
+  ])
+    .then(link => {
+      logger.info(`Generated bot invite link: ${link}`);
+      // inviteLink = link;
+    });
 });
 
 
@@ -92,6 +109,22 @@ client.on('message', async message => {
     await message.reply(error.message ? error.message : 'there was an error trying to execute that command!');
   }
 
+});
+
+// client.on("debug", function(info){
+//   console.log(`debug -> ${info}`);
+// });
+
+client.on('disconnect', (event) => {
+  logger.info(`The WebSocket has closed and will no longer attempt to reconnect`);
+});
+
+client.on('error', (error) => {
+  logger.error(`client's WebSocket encountered a connection error: ${error}`);
+});
+
+client.on('warn', (info) => {
+  logger.warn(`warn: ${info}`);
 });
 
 client.login(token);
