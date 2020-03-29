@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
-    "debug": "nodemon --inspect",
+    "start:debug": "nodemon --inspect",
+    "kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
     "start:pm2": "pm2 start index.js --name 'discord-downloader' --watch --ignore-watch='node_modules logs'; pm2 monit",
     "stop:pm2": "pm2 stop 'discord-downloader'",
     "peek:pm2": "pm2 monit",
