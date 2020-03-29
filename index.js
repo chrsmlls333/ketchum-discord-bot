@@ -116,7 +116,7 @@ client.on('message', async message => {
 // });
 
 client.on('disconnect', (event) => {
-  logger.info(`The WebSocket has closed and will no longer attempt to reconnect`);
+  logger.info(`The WebSocket has closed and will no longer attempt to reconnect: ${event}`);
 });
 
 client.on('error', (error) => {
