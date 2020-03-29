@@ -18,6 +18,10 @@ const { prefix } = require('./configuration/config.json');
 
 const logger = require('./configuration/logConfig');
 
+const utils = require('./utils');
+
+// =========================================
+
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 commandFiles.forEach(file => {
@@ -51,6 +55,14 @@ client.on('ready', async () => {
       logger.info(`Generated bot invite link: ${link}`);
       // inviteLink = link;
     });
+});
+
+
+client.on('guildCreate', server => {
+  const embed = utils.embedTemplate(client)
+    .setTitle('Thanks for adding me to your server!')
+    .setDescription(`I'm a downloader bot which can pull attachments and embeds into a big list to download later. \nFor a list of commands, send \`${prefix}help [command name]\` here or in your server!`);
+  return server.owner.send(embed);
 });
 
 

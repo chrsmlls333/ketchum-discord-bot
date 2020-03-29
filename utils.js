@@ -1,4 +1,5 @@
-// const Discord = require('discord.js');
+const Discord = require('discord.js');
+const { anonymous, embedColor } = require('./configuration/config.json');
 
 const utils = {
 
@@ -66,6 +67,18 @@ const utils = {
     if (!message) return;
     if (!message.deletable || message.deleted) return;
     message.delete({ timeout: ms });
+  },
+
+
+  // Embeds
+
+  embedTemplate: (client) => {
+    const embed = new Discord.MessageEmbed()
+      .setThumbnail(client.user.avatarURL())
+      .setColor(embedColor)
+      .setTimestamp();
+    if (!anonymous) embed.setFooter('Ketchum Bot');
+    return embed;
   },
 
 
