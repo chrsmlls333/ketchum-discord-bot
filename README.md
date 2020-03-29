@@ -12,6 +12,7 @@
 4. List our tasks: `npx ntl`
 5. Run `npm run start` or `npm run start:pm2`
 
+TODO: Document tasks/debug processes
 
 ## Author
 
