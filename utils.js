@@ -62,6 +62,12 @@ const utils = {
     return message.edit(message.content + content);
   },
 
+  deleteMessage: (message, ms = 0) => {
+    if (!message) return;
+    if (!message.deletable || message.deleted) return;
+    message.delete({ timeout: ms });
+  },
+
 
   // Sleep and Delays
 

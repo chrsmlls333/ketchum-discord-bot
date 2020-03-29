@@ -17,6 +17,7 @@ const {
   fetchIterationsMax, 
   fetchPageSize, 
   fetchDelay, 
+  statusMessageDeleteDelay,
   htmlDebugPath,
 } = require('../configuration/config.json');
 
@@ -115,12 +116,17 @@ module.exports = {
 
     const spoutUnderstanding = async (data) => {
       // Reply with plain english understanding of command
-      const { commandMessage: m, scanChannels: c, scanUsers: u, allChannels: all } = data;
+      const { 
+        commandMessage: m, 
+        scanChannels: c, 
+        scanUsers: u, 
+        allChannels: all,
+      } = data;
 
       /* eslint-disable no-multi-spaces, indent, no-constant-condition */
       let     s =  `I hear you want to scan messages `;
       if (u)  s += `posted by ${[...u.values()].join(' & ')} `;
-              s += `on ${all ? 'all channels ' : [...c.values()].join(' & ')} `;
+              s += `on ${all ? 'all channels' : [...c.values()].join(' & ')} `;
       if (0)  s += `from the last x days `;
               s += `for any and all attachments. One sec...`;
       /* eslint-enable no-multi-spaces, indent, no-constant-condition */
@@ -132,28 +138,41 @@ module.exports = {
 
     // Fetch data from message history! ===================================================
 
-    const fetch = (fetchData) => fetchData.scanChannels.get(fetchData.currentChannelID).messages
+    const statusMessageExpire = (data) => {
+      utils.deleteMessage(data.statusMessage, statusMessageDeleteDelay);
+      return data;
+    };
+
+    const fetch = (fetchData) => fetchData.scanChannels
+      .get(fetchData.currentChannelID).messages
       .fetch({ before: fetchData.earliestSnowflake, limit: fetchPageSize })
       .then(async messages => {
         const i = ++fetchData.iterations;
-        logger.debug(`Fetch! ${i}`);
-        
+        // logger.debug(`Fetch! ${i}`);
 
-        // CHECK FOR NOTHING
-        if (!messages.size) {
-          fetchData.exhausted = true;
+        // CHECK FOR CANCEL
+        if (fetchData.cancelCollector.ended) {
+          utils.deleteMessage(fetchData.statusMessage);
+          throw new Error('I\'m canceling!');
+        }
+        
+        // CHECK FOR NOTHING / END / MAXLOOP
+        if (!messages.size || 
+            (fetchIterationsMax && i > fetchIterationsMax)) {
           return utils.appendEdit(fetchData.statusMessage, ` Finished!`)
             .then(message => {
               logger.info(message.cleanContent);
               fetchData.statusMessage = message;
               return fetchData;
-            });
+            })
+            .then(statusMessageExpire);
         }
 
         // GET EARLIEST
-        const earliestTimestamp = messages.map(m => m.createdTimestamp)
+        const earliestTStamp = messages.map(m => m.createdTimestamp)
           .reduce((min, cur) => Math.min(min, cur), Infinity);
-        fetchData.earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
+        // eslint-disable-next-line max-len
+        fetchData.earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTStamp);
 
         // FILTER
         let newFiltered = messages.filter(m => { // make sure at least one attachment or embed
@@ -163,33 +182,35 @@ module.exports = {
         }); 
         
         if (fetchData.scanUsers && fetchData.scanUsers.size) {
-          newFiltered = newFiltered.filter(m => fetchData.scanUsers.some(u => u.id === m.author.id));
+          newFiltered = newFiltered.filter(m => fetchData.scanUsers
+            .some(u => u.id === m.author.id));
         }
 
         // UPDATE DATA
         fetchData.collectedTotal += messages.size;
-        const { size: last } = fetchData.collectionFiltered;
         fetchData.collectionFiltered = fetchData.collectionFiltered.concat(newFiltered);
         const { size } = fetchData.collectionFiltered;
-        const delta = size - last;
         
-        // REPORT
+        // REPORT AND LOOP
         return utils.replyOrEdit(fetchData.commandMessage, fetchData.statusMessage, 
           `for ${fetchData.scanChannels.get(fetchData.currentChannelID)} I see ${size}/${fetchData.collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
           .then(message => {
             fetchData.statusMessage = message;
             return fetchData;
-          });
-      })
-      .then(d => {
-        if (d.exhausted) return d;
-        if (fetchIterationsMax) if (d.iterations >= fetchIterationsMax) return d;
-        // else lets go for another round
-        return utils.sleep(fetchDelay).then(() => fetch(d)); 
+          })
+          .then(utils.sleepThenPass(fetchDelay))
+          .then(fetch);
       });
 
 
     const fetchChannelsCombine = (data) => {
+
+      // Setup cancelling by command
+      const filter = m => m.content.match(/^\$(cancel|stop|halt|cease)$/i) && m.author.id === data.commandMessage.author.id;
+      const cancelCollector = (
+        data.commandMessage.channel.createMessageCollector(filter, { max: 1 })
+      );
+      cancelCollector.on('collect', m => logger.debug(`Collected ${m.content}`));
 
       const fetches = data.scanChannels.map((c, k) => {
         const fetchInitData = {
@@ -206,14 +227,20 @@ module.exports = {
           
           collectedTotal: 0,
           collectionFiltered: new Discord.Collection(),
+
+          cancelCollector,
           
           earliestSnowflake: null,
         };
 
-        return fetch(fetchInitData);
+        return fetch(fetchInitData); // recursive
       });
 
       return Promise.all(fetches).then(fetchResults => {
+        // stop cancel watch
+        cancelCollector.stop();
+
+        // combine results
         data.collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
         const filteredEach = fetchResults.map(f => f.collectionFiltered);
         data.collectionLoadedMessages = new Discord.Collection().concat(...filteredEach);

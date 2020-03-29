@@ -2,8 +2,8 @@
     "prefix": "$",
 
     "fetchPageSize": 50, 
-    "fetchDelay": 500,
-    "fetchIterationsMax": 0,
+
+    "statusMessageDeleteDelay": 7000,
 
     "htmlDebugPath": "logs/debug.html"
 }
