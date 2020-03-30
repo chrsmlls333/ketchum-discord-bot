@@ -8,7 +8,6 @@
     "start:debug": "./node_modules/pm2/bin/pm2-runtime pm2.dev.json",
     "kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
     "start": "./node_modules/pm2/bin/pm2-runtime pm2.prod.json",
-    "poststart": "node ./node_modules/pm2/bin/pm2 logs",
     "lint": "eslint .",
     "pug:dev": "pug -w ./templates -o ./templates/html/ -P"
   },
