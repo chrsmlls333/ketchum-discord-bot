@@ -4,7 +4,7 @@
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "index.js",
   "scripts": {
-    "start:basic": "node .",
+    "start:basic": "node -r dotenv/config .",
     "start:debug": "./node_modules/pm2/bin/pm2-runtime pm2.dev.json",
     "kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
     "start": "./node_modules/pm2/bin/pm2-runtime pm2.prod.json",
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.0.2",
+    "dotenv": "^8.2.0",
     "moment": "^2.24.0",
     "pm2": "^4.2.3",
     "pug": "^2.0.4",

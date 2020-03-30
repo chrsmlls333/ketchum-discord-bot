@@ -3,12 +3,10 @@ const client = new Discord.Client();
 
 const fs = require('fs');
 
-const { token } = require('./configuration/token.json');
 const { prefix } = require('./configuration/config.json');
-
 const logger = require('./configuration/logConfig');
-
 const utils = require('./utils');
+
 
 // =========================================
 
@@ -131,4 +129,4 @@ client.on('warn', (info) => {
 //   process.exit();
 // });
 
-client.login(token);
+client.login(process.env.BOT_TOKEN);

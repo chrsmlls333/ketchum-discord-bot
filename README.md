@@ -8,7 +8,7 @@
 
 1. Build `npm install`
 2. Optional but recommended: `npm install pm2 -g`
-3. Enter your Discord Bot Token in `configuration/token.json`
+3. Enter your Discord BOT_TOKEN in `.env`
 4. List our tasks: `npx ntl`
 5. Run `npm run start` or `npm run start:pm2`
 
