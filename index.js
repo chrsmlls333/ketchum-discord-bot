@@ -127,4 +127,8 @@ client.on('warn', (info) => {
   logger.warn(`warn: ${info}`);
 });
 
+// process.on('SIGINT', function() {
+//   process.exit();
+// });
+
 client.login(token);

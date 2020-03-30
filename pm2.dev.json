@@ -1,0 +1,8 @@
+{
+  "name": "ketchum-downloader",
+  "script": "index.js",
+  "node_args": "--inspect",
+  "autorestart": true,
+  "watch": true,
+  "ignore_watch": [".git", "node_modules", "logs"]
+}

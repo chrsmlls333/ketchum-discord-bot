@@ -1,0 +1,6 @@
+{
+  "name": "ketchum-downloader",
+  "script": "index.js",
+  "autorestart": true,
+  "watch": false
+}
