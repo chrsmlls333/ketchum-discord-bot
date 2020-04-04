@@ -88,7 +88,7 @@ const utils = {
 
   embedTemplate: (client) => {
     const embed = new Discord.MessageEmbed()
-      .setThumbnail(client.user.avatarURL())
+      .setAuthor(client.user.username, client.user.avatarURL())
       .setColor(embedColor)
       .setTimestamp();
     if (!anonymous) embed.setFooter('Ketchum Bot');
