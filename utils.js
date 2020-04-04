@@ -96,6 +96,15 @@ const utils = {
   },
 
 
+  // String Functions
+
+  titleCase: (str) => { 
+    if ((str === null) || (str === '')) return str; 
+    const s = str.toString(); 
+    return s.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); 
+  },
+
+
   // Sleep and Delays
 
   sleep: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
