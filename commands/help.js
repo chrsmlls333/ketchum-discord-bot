@@ -33,7 +33,7 @@ module.exports = {
         .addFields(
           { name: 'Commands', value: `${commands.map(command => command.name).join(', ')}` },
           // { name: '\u200B', value: '\u200B' },
-          { name: 'Follow-up', value: `\nYou can send \`${prefix}help [command name]\` to get info on a specific command!` },
+          { name: 'Learn More', value: `\nYou can send \`${prefix}help [command name]\` to get info on a specific command!` },
         );
       return message.channel.send(embed);
     }
