@@ -28,19 +28,7 @@ client.on('ready', async () => {
   logger.info(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`); 
 
   // client.user.setActivity('the upright organ');
-  client.generateInvite([
-    'ADD_REACTIONS',
-    'VIEW_CHANNEL',
-    'SEND_MESSAGES', 
-    'EMBED_LINKS',
-    'ATTACH_FILES',
-    'READ_MESSAGE_HISTORY', 
-    'CHANGE_NICKNAME',
-  ])
-    .then(link => {
-      logger.info(`Generated bot invite link: ${link}`);
-      // inviteLink = link;
-    });
+  utils.generateInvite(client).then(link => logger.info(`Generated bot invite link: ${link}`));
 });
 
 

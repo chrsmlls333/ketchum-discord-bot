@@ -3,7 +3,21 @@ const { anonymous, embedColor } = require('./configuration/config.json');
 
 const utils = {
 
+  // Get Invite // Set permissions here
+
+  generateInvite: (client) => client.generateInvite([
+    'ADD_REACTIONS',
+    'VIEW_CHANNEL',
+    'SEND_MESSAGES', 
+    'EMBED_LINKS',
+    'ATTACH_FILES',
+    'READ_MESSAGE_HISTORY', 
+    'CHANGE_NICKNAME',
+  ]),
+
+
   // Parsing Mentions
+
   CHAN_REGEX: /^<#(\d+)>$/,
   USER_REGEX: /^<@!?(\d+)>$/,
   ROLE_REGEX: /^<@&(\d+)>$/,
