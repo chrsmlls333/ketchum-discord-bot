@@ -46,15 +46,16 @@ module.exports = {
 
     if (!command) return message.reply('that\'s not a valid command!');
 
+    const usageInline = command.name !== 'download'; // handle long strings
     const embed = utils.embedTemplate(message.client)
-      .setTitle(`${prefix}${command.name}`)
-      // .setDescription('You rang?')
+      .setTitle(utils.titleCase(command.name))
       .addFields(
-        // { name: 'Command Name', value: `${command.name}` },
-        // { name: '\u200B', value: '\u200B' },
-        { name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}` },
+        { name: 'Command Name', value: `${prefix}${command.name}`, inline: true },
+        { name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}`, inline: true },
         { name: 'Description', value: `${command.description}` },
-        { name: 'Usage', value: `${prefix}${command.name} ${command.usage}`, inline: true },
+        // { name: '\u200B', value: '\u200B' },
+        { name: 'Usage', value: `${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}`, inline: usageInline },
+        { name: 'Arguments Required?', value: utils.titleCase(command.args), inline: true },
       );
     return message.channel.send(embed);
     
