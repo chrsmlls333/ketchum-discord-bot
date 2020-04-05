@@ -314,9 +314,13 @@ const dl = {
         logger.error('No luck writin them files then? Its just the one file, actually...');
         logger.error(error.stack);
       });
+    
+    let channelstring = null;
+    if (all) channelstring = 'all';
+    if (!channelstring && scanChannels.size === 1) channelstring = scanChannels.first().name;
+    if (!channelstring) channelstring = `${scanChannels.size}channels`;
 
-    const attachment = new Discord.MessageAttachment(htmlData, 
-      `${commandMessage.guild.name.replace(' ', '')}_${all ? 'all' : scanChannels.size == 1 ? scanChannels.first().name : `${scanChannels.size}channels` }_attachments.html`);
+    const attachment = new Discord.MessageAttachment(htmlData, `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`);
     return commandMessage.reply(`here you go!`, attachment)
       .then(() => data);
   },
