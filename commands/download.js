@@ -325,12 +325,16 @@ module.exports = {
       if (!html) throw new Error('There was no html generated.');
       const htmlData = Buffer.from(html);
 
-      return fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
+    fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
         .then(() => logger.debug(`Deliverable HTML saved to ${htmlDebugPath}!`))
-        .then(() => {
-          const attachment = new Discord.MessageAttachment(htmlData, `${all ? 'all' : scanChannels.map(c => c.name).join('_')}_attachments.html`);
-          return commandMessage.reply(`here you go!`, attachment);
-        })
+      .catch(error => {
+        logger.error('No luck writin them files then? Its just the one file, actually...');
+        logger.error(error.stack);
+      });
+
+    const attachment = new Discord.MessageAttachment(htmlData, 
+      `${commandMessage.guild.name.replace(' ', '')}_${all ? 'all' : scanChannels.size == 1 ? scanChannels.first().name : `${scanChannels.size}channels` }_attachments.html`);
+    return commandMessage.reply(`here you go!`, attachment)
         .then(() => data);
     };
     
