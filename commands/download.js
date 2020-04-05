@@ -255,8 +255,7 @@ const dl = {
         const createdString = moment(m.createdAt).format('YYYYMMDD-HHmmss');
         let basename = path.basename(urlLib.parse(url).pathname);
         basename = basename.replace(/^(SPOILER_)/, '');
-        // const newname = `#${m.channel.name}/${username}_${createdString}_${basename}`;
-        const newname = path.join(`${m.guild.name}`, `#${m.channel.name}`, `${username}_${createdString}_${basename}`);
+        const newname = path.join(m.guild.name, m.channel.name, `${username}_${createdString}_${basename}`);
 
         allAttachments.set(key, {
           message: m,
