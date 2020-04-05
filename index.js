@@ -42,27 +42,31 @@ client.on('guildCreate', server => {
 
 client.on('message', async message => {
 
+  // Check message for basic validity
   const perms = await message.channel.permissionsFor(client.user);
   if (
     !message.content.startsWith(prefix) || 
     message.author.bot ||
     !perms.has('SEND_MESSAGES')
   ) return;
-
+  
+  // Parse command
   const args = message.content.slice(prefix.length).split(/ +/);
   const commandName = args.shift().toLowerCase();
 
   const command = client.commands.get(commandName) ||
    client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
   if (!command) return;
-
-  logger.debug(`'${message.content}'`); // log recieved command!
+  
+  // Log recieved command!
+  logger.debug(`${message.guild.name} #${message.channel.name}: '${message.content}'`); 
 
   if (command.guildOnly && message.channel.type !== 'text') {
     message.reply('I can\'t execute that command inside DMs!');
     return;
   }
 
+  // Handle no args
   if (command.args && !args.length) {
     let reply = `You didn't provide any arguments, ${message.author}!`;
     if (command.usage) reply += `\nThe proper usage would be: \`${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}\``;
@@ -70,6 +74,7 @@ client.on('message', async message => {
     return;
   }
 
+  // Handle cooldowns
   if (!cooldowns.has(command.name)) {
     cooldowns.set(command.name, new Discord.Collection());
   }
@@ -91,6 +96,8 @@ client.on('message', async message => {
   timestamps.set(message.author.id, now);
   setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
+
+  // Finally execute command
   try {
     logger.debug('Execute!');
     await command.execute(message, args);
