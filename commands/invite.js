@@ -14,6 +14,7 @@ module.exports = {
   guildOnly: false,
 
   args: false,
+  usage: null,
   
   execute(message) {
 

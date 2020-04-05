@@ -14,7 +14,7 @@ module.exports = {
   guildOnly: false,
 
   args: false,
-  usage: '[command name]',
+  usage: '[command name or alias]',
   
   execute(message, args) {
 
