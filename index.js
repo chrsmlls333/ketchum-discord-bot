@@ -42,7 +42,12 @@ client.on('guildCreate', server => {
 
 client.on('message', async message => {
 
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  const perms = await message.channel.permissionsFor(client.user);
+  if (
+    !message.content.startsWith(prefix) || 
+    message.author.bot ||
+    !perms.has('SEND_MESSAGES')
+  ) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
   const commandName = args.shift().toLowerCase();
