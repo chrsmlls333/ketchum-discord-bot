@@ -5,15 +5,17 @@ const utils = {
 
   // Get Invite // Set permissions here
 
-  generateInvite: (client) => client.generateInvite([
-    'ADD_REACTIONS',
-    'VIEW_CHANNEL',
-    'SEND_MESSAGES', 
-    'EMBED_LINKS',
-    'ATTACH_FILES',
-    'READ_MESSAGE_HISTORY', 
-    'CHANGE_NICKNAME',
-  ]),
+  generateInvite: (client) => client.generateInvite({
+    permissions: [
+      'ADD_REACTIONS',
+      'VIEW_CHANNEL',
+      'SEND_MESSAGES', 
+      'EMBED_LINKS',
+      'ATTACH_FILES',
+      'READ_MESSAGE_HISTORY', 
+      'CHANGE_NICKNAME',
+    ]
+  }),
 
 
   // Parsing Mentions
