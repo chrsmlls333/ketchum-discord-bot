@@ -9,5 +9,7 @@
     "embedColor": [0, 0, 255],
     "statusMessageDeleteDelay": 7000,
 
-    "htmlDebugPath": "logs/debug.html"
+    "htmlDebugPath": "logs/debug.html",
+
+    "cssFilePath": "assets/bootstrap/4.4.1/css/bootstrap.min.css"
 }

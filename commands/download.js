@@ -20,6 +20,7 @@ const {
   fetchDelay, 
   statusMessageDeleteDelay,
   htmlDebugPath,
+  cssFilePath,
 } = require('../configuration/config.json');
 
 
@@ -284,20 +285,25 @@ const dl = {
     return data;
   },
 
-  buildDownloadHtml: (data) => {
+  buildDownloadHtml: async (data) => {
     const {
       scanChannels,
       allChannels: all,
       scanUsers,
       collectionMedia,
     } = data;
+
+    const css = await fsp.readFile(cssFilePath)
+      .then(txt => Buffer.from(txt).toString('base64'));
+
     data.html = pugRender({
+      moment, // import
       server: scanChannels.first().guild.name,
       iconURL: scanChannels.first().guild.iconURL({ format: 'jpg', dynamic: true, size: 128 }),
       channels: all ? 'all' : scanChannels.map(c => c.name).join('&#'),
       users: (scanUsers && scanUsers.size) ? scanUsers.map(u => u.tag).join(' & ') : null,
-      moment,
       attachments: [...collectionMedia.values()],
+      stylesheet: `data:text/css;base64,${css}`,
       anonymous,
     });
     return data;
