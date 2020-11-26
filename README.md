@@ -10,11 +10,16 @@
 2. Optional but recommended: `npm install pm2 -g`
 3. Enter your Discord BOT_TOKEN in your environment variables or `.env`
 4. List our tasks: `npx ntl`
-5. Run `npm run start` or `npm run start:pm2`
+5. Run `npm run start` or `npm run start:basic`
 
 TODO: Document tasks/debug processes
 
 - https://pm2.keymetrics.io/docs/usage/docker-pm2-nodejs/
+
+## Update
+
+1. `npm install -g npm-check-updates`
+2. `ncu [-u]`
 
 ## Author
 
