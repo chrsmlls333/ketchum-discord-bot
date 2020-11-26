@@ -14,7 +14,7 @@ const utils = {
       'ATTACH_FILES',
       'READ_MESSAGE_HISTORY', 
       'CHANGE_NICKNAME',
-    ]
+    ],
   }),
 
 
