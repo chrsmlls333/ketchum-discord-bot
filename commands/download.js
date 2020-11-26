@@ -89,7 +89,7 @@ const dl = {
     }
     
     if (!usersFound.size) {
-      await m.reply("I don't see a user mention, but thats fine I guess!");
+      await m.reply("I don't see a user mention, but that's fine I guess!");
       return data;
     }
     data.scanUsers = usersFound;
@@ -145,7 +145,7 @@ const dl = {
       // CHECK FOR CANCEL
       if (fetchData.cancelCollector.ended) {
         utils.deleteMessage(fetchData.statusMessage);
-        throw new Error('I\'m canceling!');
+        throw new Error('I\'m cancelling!');
       }
       
       // CHECK FOR NOTHING / END / MAXLOOP
@@ -323,7 +323,7 @@ const dl = {
     fsp.writeFile(htmlDebugPath, htmlData, 'utf8')
       .then(() => logger.debug(`Deliverable HTML saved to ${htmlDebugPath}!`))
       .catch(error => {
-        logger.error('No luck writin them files then? Its just the one file, actually...');
+        logger.error('No luck writin\' them files then? Its just the one file, actually...');
         logger.error(error.stack);
       });
     
