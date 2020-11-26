@@ -33,7 +33,7 @@ const dl = {
   guildOnly: true,
 
   args: true,
-  usage: '[...#channel, here, this, all, any] [...@user, time]',
+  usage: '[...#channel, here, this, all, any] [@user] [time]',
   
   
   // Parse command arguments ======================================================
@@ -97,7 +97,13 @@ const dl = {
     return data;
   },
 
-  // const parseTime
+  parseTime: async (data) => {
+
+    // Insert guts here
+
+    data.dateLimit = null;
+    return data;
+  },
 
   spoutUnderstanding: async (data) => {
     // Reply with plain english understanding of command
@@ -337,6 +343,7 @@ const dl = {
       scanChannels: null,
       allChannels: false,
       scanUsers: null,
+      dateLimit: null,
 
       collectionLoadedMessages: null,
       collectionMedia: null,
@@ -348,6 +355,7 @@ const dl = {
     return Promise.resolve(initData)
       .then(dl.parseChannel)
       .then(dl.parseUser)
+      .then(dl.parseTime)
       .then(dl.spoutUnderstanding)
       .then(dl.fetchChannelsCombine)
       .then(dl.buildLinkCollection)
