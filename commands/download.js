@@ -1,7 +1,3 @@
-/* eslint-disable func-names */
-/* eslint-disable prefer-arrow-callback */
-/* eslint-disable no-param-reassign */
-
 const Discord = require('discord.js');
 const logger = require('winston');
 const moment = require('moment');
@@ -41,6 +37,8 @@ const dl = {
   
   parseChannel: async (data) => {
     const { scanChannels, commandMessage: m, commandMessageArgs: a } = data;
+    let { allChannels } = data;
+
     if (scanChannels) return data;
     if (!a.length) return data;
 
@@ -52,7 +50,7 @@ const dl = {
       if (!c && arg.match(/^(all|any)$/i)) {
         if (m.channel.type === 'dm') throw new Error("I really can't do this in a DM!");
         if (!m.channel.guild.available) throw new Error("I don't see your server!");
-        data.allChannels = true;
+        allChannels = true;
         const textChannels = m.channel.guild.channels.cache.filter(gc => gc.type === 'text' && !gc.deleted && gc.viewable);
         textChannels.each((chan) => channelsFound.set(chan.id, chan));
         c = textChannels.first(); // To appease current if/else structure
@@ -68,6 +66,7 @@ const dl = {
       ...data,
       scanChannels: channelsFound,
       commandMessageArgs: a,
+      allChannels,
     };
   },
 
@@ -92,18 +91,24 @@ const dl = {
       await m.reply("I don't see a user mention, but that's fine I guess!");
       return data;
     }
-    data.scanUsers = usersFound;
-    
-    data.commandMessageArgs = a;
-    return data;
+
+    return {
+      ...data,
+      scanUsers: usersFound,
+      commandMessageArgs: a,
+    };
   },
 
   parseTime: async (data) => {
+    // eslint-disable-next-line prefer-const
+    let { dataLimit } = data;
 
     // Insert guts here
 
-    data.dateLimit = null;
-    return data;
+    return {
+      ...data,
+      dataLimit,
+    };
   },
 
   spoutUnderstanding: async (data) => {
@@ -139,7 +144,14 @@ const dl = {
     .get(fetchData.currentChannelID).messages
     .fetch({ before: fetchData.earliestSnowflake, limit: fetchPageSize })
     .then(async messages => {
-      const i = ++fetchData.iterations;
+      let { 
+        iterations,
+        earliestSnowflake,
+        collectedTotal,
+        collectionFiltered,
+      } = fetchData;
+
+      const i = ++iterations;
       // logger.debug(`Fetch! ${i}`);
 
       // CHECK FOR CANCEL
@@ -154,8 +166,7 @@ const dl = {
         return utils.appendEdit(fetchData.statusMessage, ` Finished!`)
           .then(message => {
             logger.info(message.cleanContent);
-            fetchData.statusMessage = message;
-            return fetchData;
+            return { ...fetchData, statusMessage: message };
           })
           .then(dl.statusMessageExpire);
       }
@@ -164,7 +175,7 @@ const dl = {
       const earliestTStamp = messages.map(m => m.createdTimestamp)
         .reduce((min, cur) => Math.min(min, cur), Infinity);
       // eslint-disable-next-line max-len
-      fetchData.earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTStamp);
+      earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTStamp);
 
       // FILTER
       let newFiltered = messages.filter(m => { // make sure at least one attachment or embed
@@ -179,17 +190,21 @@ const dl = {
       }
 
       // UPDATE DATA
-      fetchData.collectedTotal += messages.size;
-      fetchData.collectionFiltered = fetchData.collectionFiltered.concat(newFiltered);
+      collectedTotal += messages.size;
+      collectionFiltered = fetchData.collectionFiltered.concat(newFiltered);
       const { size } = fetchData.collectionFiltered;
       
       // REPORT AND LOOP
       return utils.replyOrEdit(fetchData.commandMessage, fetchData.statusMessage, 
         `for ${fetchData.scanChannels.get(fetchData.currentChannelID)} I see ${size}/${fetchData.collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
-        .then(message => {
-          fetchData.statusMessage = message;
-          return fetchData;
-        })
+        .then(message => ({
+          ...fetchData,
+          statusMessage: message,
+          iterations,
+          earliestSnowflake,
+          collectedTotal,
+          collectionFiltered,
+        }))
         .then(utils.sleepThenPass(fetchDelay))
         .then(dl.fetch);
     }),
@@ -238,10 +253,11 @@ const dl = {
       // setTimeout(() => data.commandMessage.channel.bulkDelete(statusMessages), statusMessageDeleteDelay);
 
       // combine results
-      data.collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
+      let { collectedTotal, collectionLoadedMessages } = data;
+      collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
       const filteredEach = fetchResults.map(f => f.collectionFiltered);
-      data.collectionLoadedMessages = new Discord.Collection().concat(...filteredEach);
-      return data;
+      collectionLoadedMessages = new Discord.Collection().concat(...filteredEach);
+      return { ...data, collectedTotal, collectionLoadedMessages };
     });
 
   },
@@ -281,8 +297,8 @@ const dl = {
     });
 
     if (!allAttachments.size) throw new Error('Our processed collection of embeds and attachments is empty!');
-    data.collectionMedia = allAttachments;
-    return data;
+
+    return { ...data, collectionMedia: allAttachments };
   },
 
   buildDownloadHtml: async (data) => {
@@ -296,7 +312,7 @@ const dl = {
     const css = await fsp.readFile(cssFilePath)
       .then(txt => Buffer.from(txt).toString('base64'));
 
-    data.html = pugRender({
+    const html = pugRender({
       moment, // import
       server: scanChannels.first().guild.name,
       iconURL: scanChannels.first().guild.iconURL({ format: 'jpg', dynamic: true, size: 128 }),
@@ -306,7 +322,8 @@ const dl = {
       stylesheet: `data:text/css;base64,${css}`,
       anonymous,
     });
-    return data;
+
+    return { ...data, html };
   },
 
   distributeHTMLData: (data) => {
