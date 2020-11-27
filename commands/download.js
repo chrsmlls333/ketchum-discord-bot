@@ -155,6 +155,14 @@ const dl = {
     .get(fetchData.currentChannelID).messages
     .fetch({ before: fetchData.earliestSnowflake, limit: fetchPageSize })
     .then(async messages => {
+      const {
+        commandMessage,
+        statusMessage,
+        scanChannels,
+        currentChannelID,
+        scanUsers,
+        scanDateLimit,
+      } = fetchData;
       let { 
         iterations,
         earliestSnowflake,
@@ -188,26 +196,34 @@ const dl = {
       // eslint-disable-next-line max-len
       earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTStamp);
 
-      // FILTER
-      let newFiltered = messages.filter(m => { // make sure at least one attachment or embed
+      // FILTER /////////////////////////////////////////////////////////////////////////
+      let creme = [];
+
+      // Filter attachments
+      creme = messages.filter(m => { // make sure at least one attachment or embed
         if (m.attachments.size) return true;
         if (m.embeds.length) return m.embeds.some(e => new RegExp('image|video').test(e.type));
         return false;
       }); 
       
-      if (fetchData.scanUsers && fetchData.scanUsers.size) {
-        newFiltered = newFiltered.filter(m => fetchData.scanUsers
-          .some(u => u.id === m.author.id));
+      // Filter for specced users
+      if (scanUsers && scanUsers.size) {
+        creme = creme.filter(m => scanUsers.some(u => u.id === m.author.id));
       }
 
-      // UPDATE DATA
+      // Filter for date
+      if (scanDateLimit) {
+        creme = creme.filter(m => dayjs(m.createdAt).isSameOrAfter(scanDateLimit));
+      }
+
+      // UPDATE DATA /////////////////////////////////////////////////////////////
       collectedTotal += messages.size;
-      collectionFiltered = fetchData.collectionFiltered.concat(newFiltered);
-      const { size } = fetchData.collectionFiltered;
+      collectionFiltered = collectionFiltered.concat(creme);
+      const { size } = collectionFiltered;
       
       // REPORT AND LOOP
-      return utils.replyOrEdit(fetchData.commandMessage, fetchData.statusMessage, 
-        `for ${fetchData.scanChannels.get(fetchData.currentChannelID)} I see ${size}/${fetchData.collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
+      return utils.replyOrEdit(commandMessage, statusMessage, 
+        `for ${scanChannels.get(currentChannelID)} I see ${size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
         .then(message => ({
           ...fetchData,
           statusMessage: message,
