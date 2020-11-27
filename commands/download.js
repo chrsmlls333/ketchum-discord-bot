@@ -116,11 +116,9 @@ const dl = {
 
   parseTime: async (data) => {
     const { commandMessageArgs: a, scanDateLimit } = data;
-
     if (scanDateLimit) return data;
     if (!a.length) return data;
 
-    // Insert guts here
     const s = a.join(' ');
     logger.debug(`Time string to interpret: ${s}`);
     const date = chrono.parseDate(s);
@@ -189,12 +187,11 @@ const dl = {
 
       // CHECK FOR CANCEL
       if (fetchData.cancelCollector.ended) {
-        utils.deleteMessage(fetchData.statusMessage);
+        utils.deleteMessage(statusMessage);
         throw new Error('I\'m cancelling!');
       }
       
       // CHECK FOR NOTHING / END / MAXLOOP / TIME
-
       const noMessages = !messages.size;
       const reachedDebugMax = fetchIterationsMax && i > fetchIterationsMax;
       let pastTimeLimit = false;
@@ -207,9 +204,7 @@ const dl = {
           pastTimeLimit = dayjs(newestDate).isBefore(scanDateLimit);
         }
       }
-      if (noMessages || 
-          reachedDebugMax ||
-          pastTimeLimit) {
+      if (noMessages || reachedDebugMax || pastTimeLimit) {
         if (statusMessage) {
           return utils.appendEdit(statusMessage, ` Finished!`)
             .then(message => {
@@ -250,11 +245,10 @@ const dl = {
       // UPDATE DATA /////////////////////////////////////////////////////////////
       collectedTotal += messages.size;
       collectionFiltered = collectionFiltered.concat(creme);
-      const { size } = collectionFiltered;
       
       // REPORT AND LOOP
       return utils.replyOrEdit(commandMessage, statusMessage, 
-        `for ${scanChannels.get(currentChannelID)} I see ${size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
+        `for ${scanChannels.get(currentChannelID)} I see ${collectionFiltered.size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
         .then(message => ({
           ...fetchData,
           statusMessage: message,
