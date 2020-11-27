@@ -34,7 +34,7 @@ const dl = {
   cancelAliases: ['cancel', 'stop', 'halt'],
 
   description: `
-    Download... something!
+    Download... something! Takes a channel, then a user, then a time in plain english. 
     Remember you can cancel while this is running.
   `,
 
