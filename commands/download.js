@@ -14,6 +14,7 @@ const pugRender = pug.compileFile('templates/download.pug');
 
 const utils = require('../utils');
 const {
+  prefix,
   anonymous,
   fetchIterationsMax, 
   fetchPageSize, 
@@ -24,12 +25,18 @@ const {
 } = require('../configuration/config.json');
 
 
+
+
 const dl = {
 
   name: 'download',
   aliases: ['dl', 'save'],
+  cancelAliases: ['cancel', 'stop', 'halt'],
 
-  description: 'Download... something!',
+  description: `
+    Download... something!
+    Remember you can cancel while this is running.
+  `,
 
   guildOnly: true,
 
@@ -217,12 +224,15 @@ const dl = {
   fetchChannelsCombine: (data) => {
 
     // Setup cancelling by command
-    const filter = m => m.content.match(/^\$(cancel|stop|halt|cease)$/i) && m.author.id === data.commandMessage.author.id;
+    const cancelRegex = new RegExp(`^\\${prefix}(${dl.cancelAliases.join('|')})$`, 'i');
+    const filter = m => cancelRegex.test(m.content) && 
+                        m.author.id === data.commandMessage.author.id;
     const cancelCollector = (
       data.commandMessage.channel.createMessageCollector(filter, { max: 1 })
     );
     cancelCollector.on('collect', m => logger.debug(`Collected ${m.content}`));
-
+    
+    // Start Per-Channel Fetch in Parallel
     const fetches = data.scanChannels.map((c, k) => {
       const fetchInitData = {
         commandMessage: data.commandMessage,
