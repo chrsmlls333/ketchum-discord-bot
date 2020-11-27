@@ -193,22 +193,39 @@ const dl = {
         throw new Error('I\'m cancelling!');
       }
       
-      // CHECK FOR NOTHING / END / MAXLOOP
-      if (!messages.size || 
-          (fetchIterationsMax && i > fetchIterationsMax)) {
-        return utils.appendEdit(fetchData.statusMessage, ` Finished!`)
-          .then(message => {
-            logger.info(message.cleanContent);
-            return { ...fetchData, statusMessage: message };
-          })
-          .then(dl.statusMessageExpire);
+      // CHECK FOR NOTHING / END / MAXLOOP / TIME
+
+      const noMessages = !messages.size;
+      const reachedDebugMax = fetchIterationsMax && i > fetchIterationsMax;
+      let pastTimeLimit = false;
+      if (!noMessages && scanDateLimit) {
+        const timestamps = messages.map(m => m.createdTimestamp);
+        const newestTimestamp = timestamps.reduce((a, b) => Math.max(a, b), -Infinity);
+        // eslint-disable-next-line max-len
+        const newestDate = messages.find(m => m.createdTimestamp === newestTimestamp).createdAt || null;
+        if (dayjs(newestDate).isValid()) {
+          pastTimeLimit = dayjs(newestDate).isBefore(scanDateLimit);
+        }
+      }
+      if (noMessages || 
+          reachedDebugMax ||
+          pastTimeLimit) {
+        if (statusMessage) {
+          return utils.appendEdit(statusMessage, ` Finished!`)
+            .then(message => {
+              logger.info(message.cleanContent);
+              return { ...fetchData, statusMessage: message };
+            })
+            .then(dl.statusMessageExpire);
+        }
+        // Simple return if no status to report
+        return fetchData;
       }
 
       // GET EARLIEST
-      const earliestTStamp = messages.map(m => m.createdTimestamp)
-        .reduce((min, cur) => Math.min(min, cur), Infinity);
-      // eslint-disable-next-line max-len
-      earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTStamp);
+      const timestamps = messages.map(m => m.createdTimestamp);
+      const earliestTimestamp = timestamps.reduce((a, b) => Math.min(a, b), Infinity);
+      earliestSnowflake = messages.findKey(m => m.createdTimestamp === earliestTimestamp);
 
       // FILTER /////////////////////////////////////////////////////////////////////////
       let creme = [];
