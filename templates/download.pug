@@ -48,7 +48,9 @@ html(lang="en")
                                 code *title*
                                 |  as your Mask 🏷️ to rename the file with the username, posting date, and original filename.
                 .card-footer
-                    small.text-muted= `Scanned ${dayjs().format("MMMM Do YYYY, h:mm:ss a")}${anonymous ? '' : ' by Ketchum Bot for Discord'}`
+                    - let dateString = `Scanned ${dayjs().format("MMMM Do YYYY, h:mm:ss a")}`
+                    - if (dateLimit) dateString += `, only as far back as ${dayjs(dateLimit).format("MMMM Do YYYY")}`
+                    small.text-muted.float-left= dateString
                         
 
             if attachments
@@ -74,6 +76,9 @@ html(lang="en")
                                     td= a.basename
                                     td.text-center
                                         a(href=a.url title=a.newname target='_blank') 💾
+                            if dateLimit
+                                tr.table-warning
+                                    td.text-center(colspan=7)= `Results have been trimmed at ${dayjs(dateLimit).format("YYYY/MM/DD")}`
 
             else
                 p No attachments found?

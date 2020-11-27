@@ -362,6 +362,7 @@ const dl = {
       scanChannels,
       allChannels: all,
       scanUsers,
+      scanDateLimit,
       collectionMedia,
     } = data;
 
@@ -377,6 +378,7 @@ const dl = {
       attachments: [...collectionMedia.values()],
       stylesheet: `data:text/css;base64,${css}`,
       anonymous,
+      dateLimit: dayjs(scanDateLimit).isValid() ? scanDateLimit : null,
     });
 
     return { ...data, html };
