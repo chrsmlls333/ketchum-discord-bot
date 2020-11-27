@@ -1,8 +1,8 @@
 # ketchum-discord-bot ✨
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
+![Version](https://img.shields.io/badge/version-0.3.0-blue.svg?cacheSeconds=2592000)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-> Simple Discord bot to download all images and files with attribution (hopefully)
+> Simple Discord bot to download all images and files with attribution (hopefully). Supports specifying channels, users, and time ranges (time in natural language).
 
 ## Install
 
