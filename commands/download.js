@@ -280,7 +280,7 @@ const dl = {
   // Prepare for export ====================================================================
 
   buildLinkCollection: (data) => {
-    if (!data.collectionLoadedMessages && !data.collectionLoadedMessages.size) throw new Error('No collection of embeds and attachments to parse!');
+    if (!data.collectionLoadedMessages || !data.collectionLoadedMessages.size) throw new Error('No messages, no attachments! Simple as that!');
     
     const messages = data.collectionLoadedMessages;
     const allAttachments = new Discord.Collection();
@@ -310,7 +310,7 @@ const dl = {
       });
     });
 
-    if (!allAttachments.size) throw new Error('Our processed collection of embeds and attachments is empty!');
+    if (!allAttachments.size) throw new Error('Seems there weren\'t any attachments in your search results!');
 
     return { ...data, collectionMedia: allAttachments };
   },
