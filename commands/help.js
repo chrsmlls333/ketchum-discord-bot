@@ -9,7 +9,7 @@ const { prefix } = require('../configuration/config.json');
 module.exports = {
 
   name: 'help',
-  aliases: ['commands'],
+  aliases: ['h', 'commands'],
 
   description: 'List all of my commands or info about a specific command.',
 
