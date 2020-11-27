@@ -14,9 +14,9 @@
   "author": "Chris Mills",
   "license": "ISC",
   "dependencies": {
+    "dayjs": "^1.9.6",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "moment": "^2.29.1",
     "pm2": "^4.5.0",
     "pug": "^3.0.0",
     "winston": "^3.3.3"

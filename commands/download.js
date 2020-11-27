@@ -1,9 +1,13 @@
 const Discord = require('discord.js');
+
 const logger = require('winston');
-const moment = require('moment');
+
 const path = require('path');
 const urlLib = require('url');
 const fsp = require('fs').promises;
+
+const dayjs = require('dayjs');
+dayjs.extend(require('dayjs/plugin/advancedFormat'));
 
 const pug = require('pug');
 const pugRender = pug.compileFile('templates/download.pug');
@@ -275,7 +279,7 @@ const dl = {
 
       const ingestAttachmentEmbed = (key, url) => {
         const username = m.author.username.replace(/[^\w-]+/g, '') || m.author.tag;
-        const createdString = moment(m.createdAt).format('YYYYMMDD-HHmmss');
+        const createdString = dayjs(m.createdAt).format('YYYYMMDD-HHmmss');
         let basename = path.basename(urlLib.parse(url).pathname);
         basename = basename.replace(/^(SPOILER_)/, '');
         const newname = path.join(m.guild.name, m.channel.name, `${username}_${createdString}_${basename}`);
@@ -313,7 +317,7 @@ const dl = {
       .then(txt => Buffer.from(txt).toString('base64'));
 
     const html = pugRender({
-      moment, // import
+      dayjs, // import
       server: scanChannels.first().guild.name,
       iconURL: scanChannels.first().guild.iconURL({ format: 'jpg', dynamic: true, size: 128 }),
       channels: all ? 'all' : scanChannels.map(c => c.name).join('&#'),

@@ -48,7 +48,7 @@ html(lang="en")
                                 code *title*
                                 |  as your Mask 🏷️ to rename the file with the username, posting date, and original filename.
                 .card-footer
-                    small.text-muted= `Scanned ${moment().format("MMMM Do YYYY, h:mm:ss a")}${anonymous ? '' : ' by Ketchum bot for Discord'}`
+                    small.text-muted= `Scanned ${dayjs().format("MMMM Do YYYY, h:mm:ss a")}${anonymous ? '' : ' by Ketchum Bot for Discord'}`
                         
 
             if attachments
@@ -67,7 +67,7 @@ html(lang="en")
                             each a, i in attachments
                                 tr  
                                     th(scope="row")= i + 1
-                                    td= moment(a.message.createdAt).format("YYYY/MM/DD")
+                                    td= dayjs(a.message.createdAt).format("YYYY/MM/DD")
                                     td= a.message.guild.available && a.message.guild.name
                                     td= '#' + a.message.channel.name
                                     td= a.message.author.tag
