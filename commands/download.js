@@ -241,7 +241,7 @@ const dl = {
         
         scanChannels: data.scanChannels && data.scanChannels.clone(),
         currentChannelID: k,
-        scanUsers: data.scanUsers && data.scanUsers,
+        scanUsers: data.scanUsers && data.scanUsers.clone(),
       
         iterations: 0,
         exhausted: false,
