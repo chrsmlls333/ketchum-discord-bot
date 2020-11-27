@@ -9,6 +9,8 @@ const fsp = require('fs').promises;
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/advancedFormat'));
 
+const chrono = require('chrono-node');
+
 const pug = require('pug');
 const pugRender = pug.compileFile('templates/download.pug');
 
@@ -111,14 +113,23 @@ const dl = {
   },
 
   parseTime: async (data) => {
-    // eslint-disable-next-line prefer-const
-    let { dataLimit } = data;
+    const { commandMessageArgs: a, scanDateLimit } = data;
+
+    if (scanDateLimit) return data;
+    if (!a.length) return data;
 
     // Insert guts here
+    const s = a.join(' ');
+    logger.debug(`Time string to interpret: ${s}`);
+    const date = chrono.parseDate(s);
+
+    if (!dayjs(date).isValid()) return data;
+    if (!dayjs(date).isBefore()) return data;
 
     return {
       ...data,
-      dataLimit,
+      scanDateLimit: date,
+      commandMessageArgs: [],
     };
   },
 
@@ -258,6 +269,7 @@ const dl = {
         scanChannels: data.scanChannels && data.scanChannels.clone(),
         currentChannelID: k,
         scanUsers: data.scanUsers && data.scanUsers.clone(),
+        scanDateLimit: data.scanDateLimit,
       
         iterations: 0,
         exhausted: false,
@@ -396,7 +408,7 @@ const dl = {
       scanChannels: null,
       allChannels: false,
       scanUsers: null,
-      dateLimit: null,
+      scanDateLimit: null,
 
       collectionLoadedMessages: null,
       collectionMedia: null,
