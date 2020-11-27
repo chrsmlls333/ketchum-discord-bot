@@ -8,6 +8,8 @@ const fsp = require('fs').promises;
 
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/advancedFormat'));
+dayjs.extend(require('dayjs/plugin/relativeTime'));
+dayjs.extend(require('dayjs/plugin/isSameOrAfter'));
 
 const chrono = require('chrono-node');
 
@@ -140,14 +142,15 @@ const dl = {
       scanChannels: c, 
       scanUsers: u, 
       allChannels: all,
+      scanDateLimit: d,
     } = data;
 
     /* eslint-disable no-multi-spaces, indent, no-constant-condition */
     let     s =  `I hear you want to scan messages `;
     if (u)  s += `posted by ${[...u.values()].join(' & ')} `;
-            s += `on ${all ? 'all channels' : [...c.values()].join(' & ')} `;
-    if (0)  s += `from the last x days `;
-            s += `for any and all attachments. One sec...`;
+            s += `in ${all ? 'all channels' : [...c.values()].join(' & ')} `;
+    if (d)  s += `since ${dayjs(d).fromNow()} (${dayjs(d).format('MMMM Do YYYY')}) `;
+            s += `for any direct attachments. One sec...`;
     /* eslint-enable no-multi-spaces, indent, no-constant-condition */
 
     const spoutMessage = await m.reply(s);
