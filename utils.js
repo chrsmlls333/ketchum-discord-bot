@@ -1,7 +1,20 @@
 const Discord = require('discord.js');
-const { anonymous, embedColor } = require('./configuration/config.json');
+const { embedColor, botAttribution } = require('./configuration/config.json');
 
 const utils = {
+
+  // check Anonymous Mode
+
+  checkAnonymous: () => {
+    let a = process.env.ANONYMOUS || false;
+    if (typeof a === 'string') {
+      if (a.toLowerCase() === 'false' ||
+          a === '0') {
+        a = false;
+      }
+    }
+    return a;
+  },
 
   // Get Invite // Set permissions here
 
@@ -93,7 +106,10 @@ const utils = {
       .setAuthor(client.user.username, client.user.avatarURL())
       .setColor(embedColor)
       .setTimestamp();
-    if (!anonymous) embed.setFooter('Ketchum Bot');
+    if (!utils.checkAnonymous()) {
+      embed.setAuthor(client.user.username, client.user.avatarURL(), botAttribution.github);
+      embed.setFooter(botAttribution.name);
+    }
     return embed;
   },
 

@@ -19,13 +19,13 @@ const pugRender = pug.compileFile('templates/download.pug');
 const utils = require('../utils');
 const {
   prefix,
-  anonymous,
   fetchIterationsMax, 
   fetchPageSize, 
   fetchDelay, 
   statusMessageDeleteDelay,
   htmlDebugPath,
   cssFilePath,
+  botAttribution,
 } = require('../configuration/config.json');
 
 
@@ -377,8 +377,8 @@ const dl = {
       users: (scanUsers && scanUsers.size) ? scanUsers.map(u => u.tag).join(' & ') : null,
       attachments: [...collectionMedia.values()],
       stylesheet: `data:text/css;base64,${css}`,
-      anonymous,
       dateLimit: dayjs(scanDateLimit).isValid() ? scanDateLimit : null,
+      botAttribution: utils.checkAnonymous() ? null : botAttribution,
     });
 
     return { ...data, html };

@@ -10,6 +10,11 @@ const utils = require('./utils');
 
 // =========================================
 
+const anonymous = utils.checkAnonymous();
+if (anonymous) logger.info('Running anonymously...');
+
+// =========================================
+
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 commandFiles.forEach(file => {

@@ -51,6 +51,9 @@ html(lang="en")
                     - let dateString = `Scanned ${dayjs().format("MMMM Do YYYY, h:mm:ss a")}`
                     - if (dateLimit) dateString += `, only as far back as ${dayjs(dateLimit).format("MMMM Do YYYY")}`
                     small.text-muted.float-left= dateString
+                    if botAttribution
+                        small.text-muted.float-right 
+                            a(href=botAttribution.github target='_blank')= "⬇️ " + botAttribution.name
                         
 
             if attachments

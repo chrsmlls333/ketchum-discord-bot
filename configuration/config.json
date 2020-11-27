@@ -1,6 +1,5 @@
 {
     "prefix": "$",
-    "anonymous": true,
 
     "fetchPageSize": 50, 
     "fetchDelay": 100,
@@ -11,5 +10,10 @@
 
     "htmlDebugPath": "logs/debug.html",
 
-    "cssFilePath": "assets/bootstrap/4.4.1/css/bootstrap.min.css"
+    "cssFilePath": "assets/bootstrap/4.4.1/css/bootstrap.min.css",
+
+    "botAttribution": {
+        "name": "Ketchum Bot for Discord",
+        "github": "https://github.com/chrsmlls333/Ketchum-Bot-for-Discord"
+    }
 }
