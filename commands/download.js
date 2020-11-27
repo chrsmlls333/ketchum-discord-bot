@@ -30,6 +30,7 @@ const {
 
 
 
+// =======================================================================================
 
 const dl = {
 
@@ -286,7 +287,6 @@ const dl = {
         scanDateLimit: data.scanDateLimit,
       
         iterations: 0,
-        exhausted: false,
         
         collectedTotal: 0,
         collectionFiltered: new Discord.Collection(),
