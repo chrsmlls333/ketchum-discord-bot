@@ -103,7 +103,7 @@ const dl = {
     }
     
     if (!usersFound.size) {
-      await m.reply("I don't see a user mention, but that's fine I guess!");
+      // await m.reply("I don't see a user mention, but that's fine I guess!");
       return data;
     }
 
