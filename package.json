@@ -14,7 +14,7 @@
   "author": "Chris Mills",
   "license": "ISC",
   "dependencies": {
-    "chrono-node": "^2.1.9",
+    "chrono-node": "^2.2.4",
     "dayjs": "^1.9.6",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
