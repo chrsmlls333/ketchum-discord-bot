@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.2 - 2021-11-10
+### Changes
+- Minor additions to error reporting
+- Organize source files, should be no noticeable difference
+### Fixes
+- Version stepping inconsistencies
+  - TODO need a script to auto-update version and add tag
+- Heroku node & npm versions were floating
+
+
 ## v0.4.1 - 2020-11-27
 ### Fixes
 - Adjust github link in config to updated repo name
