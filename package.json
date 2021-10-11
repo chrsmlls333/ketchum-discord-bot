@@ -14,24 +14,24 @@
   "author": "Chris Mills",
   "license": "ISC",
   "dependencies": {
-    "chrono-node": "^2.1.9",
-    "dayjs": "^1.9.6",
-    "discord.js": "^12.5.1",
-    "dotenv": "^8.2.0",
-    "pm2": "^4.5.0",
-    "pug": "^3.0.0",
+    "chrono-node": "^2.3.2",
+    "dayjs": "^1.10.7",
+    "discord.js": "^12.5.3",
+    "dotenv": "^10.0.0",
+    "pm2": "^5.1.2",
+    "pug": "^3.0.2",
     "winston": "^3.3.3"
   },
   "devDependencies": {
     "eslint": "^7.14.0",
     "eslint-config-airbnb": "^18.2.1",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0"
   },
   "engines": {
-    "node": "14.15.x",
-    "npm": "7.x"
+    "node": "^14.15.1",
+    "npm": "^7.13.0"
   }
 }
