@@ -31,6 +31,7 @@
     "eslint-plugin-react-hooks": "^4.2.0"
   },
   "engines": {
-    "node": "14.15.x"
+    "node": "14.15.x",
+    "npm": "7.x"
   }
 }
