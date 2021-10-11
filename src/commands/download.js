@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { Collection, MessageAttachment } = require('discord.js');
 
 const logger = require('winston');
 
@@ -58,16 +58,16 @@ const dl = {
     if (scanChannels) return data;
     if (!a.length) return data;
 
-    const channelsFound = new Discord.Collection();
+    const channelsFound = new Collection();
     while (a.length) {
       const arg = a[0];
       let c = utils.getChannelFromMention(m, arg);
       if (!c && arg.match(/^(this|here)$/i)) c = m.channel;
       if (!c && arg.match(/^(all|any)$/i)) {
-        if (m.channel.type === 'dm') throw new Error("I really can't do this in a DM!");
+        if (m.channel.type === 'DM') throw new Error("I really can't do this in a DM!");
         if (!m.channel.guild.available) throw new Error("I don't see your server!");
         allChannels = true;
-        const textChannels = m.channel.guild.channels.cache.filter(gc => gc.type === 'text' && !gc.deleted && gc.viewable);
+        const textChannels = m.channel.guild.channels.cache.filter(gc => gc.type === 'GUILD_TEXT' && !gc.deleted && gc.viewable);
         textChannels.each((chan) => channelsFound.set(chan.id, chan));
         c = textChannels.first(); // To appease current if/else structure
       }
@@ -91,12 +91,17 @@ const dl = {
     if (scanUsers) return data;
     if (!a.length) return data;
 
-    const usersFound = new Discord.Collection();
+    const usersFound = new Collection();
     while (a.length) {
       const arg = a[0];
       const u = utils.getUserFromMention(m, arg);
       if (!u) {
-        if (utils.isRoleFromMention(arg)) m.reply("I don't know what to do with roles and bots. Ignoring that bit!");
+        if (utils.isRoleFromMention(arg)) {
+          m.reply({ 
+            content: "I don't know what to do with roles and bots. Ignoring that bit!", 
+            ...utils.doNotNotifyReply,
+          });
+        }
         break;
       }
       usersFound.set(u.id, u);
@@ -152,7 +157,7 @@ const dl = {
             s += `for any direct attachments. One sec...`;
     /* eslint-enable no-multi-spaces, indent, no-constant-condition */
 
-    const spoutMessage = await m.reply(s);
+    const spoutMessage = await m.reply({ content: s, ...utils.doNotNotifyReply });
     logger.info(spoutMessage.cleanContent);
     return data;
   },
@@ -165,14 +170,14 @@ const dl = {
   },
 
   fetch: (fetchData) => fetchData.scanChannels
-    .get(fetchData.currentChannelID).messages
+    .get(fetchData.currentChannelId).messages
     .fetch({ before: fetchData.earliestSnowflake, limit: fetchPageSize })
     .then(async messages => {
       const {
         commandMessage,
         statusMessage,
         scanChannels,
-        currentChannelID,
+        currentChannelId,
         scanUsers,
         scanDateLimit,
       } = fetchData;
@@ -249,7 +254,7 @@ const dl = {
       
       // REPORT AND LOOP
       return utils.replyOrEdit(commandMessage, statusMessage, 
-        `for ${scanChannels.get(currentChannelID)} I see ${collectionFiltered.size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
+        `for ${scanChannels.get(currentChannelId)} I see ${collectionFiltered.size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
         .then(message => ({
           ...fetchData,
           statusMessage: message,
@@ -270,7 +275,7 @@ const dl = {
     const filter = m => cancelRegex.test(m.content) && 
                         m.author.id === data.commandMessage.author.id;
     const cancelCollector = (
-      data.commandMessage.channel.createMessageCollector(filter, { max: 1 })
+      data.commandMessage.channel.createMessageCollector({ filter, max: 1 })
     );
     cancelCollector.on('collect', m => logger.debug(`Collected ${m.content}`));
     
@@ -282,14 +287,14 @@ const dl = {
         statusMessage: null,
         
         scanChannels: data.scanChannels && data.scanChannels.clone(),
-        currentChannelID: k,
+        currentChannelId: k,
         scanUsers: data.scanUsers && data.scanUsers.clone(),
         scanDateLimit: data.scanDateLimit,
       
         iterations: 0,
         
         collectedTotal: 0,
-        collectionFiltered: new Discord.Collection(),
+        collectionFiltered: new Collection(),
 
         cancelCollector,
         
@@ -312,7 +317,7 @@ const dl = {
       let { collectedTotal, collectionLoadedMessages } = data;
       collectedTotal = fetchResults.reduce((acc, result) => acc + result.collectedTotal, 0);
       const filteredEach = fetchResults.map(f => f.collectionFiltered);
-      collectionLoadedMessages = new Discord.Collection().concat(...filteredEach);
+      collectionLoadedMessages = new Collection().concat(...filteredEach);
       return { ...data, collectedTotal, collectionLoadedMessages };
     });
 
@@ -325,7 +330,7 @@ const dl = {
     if (!data.collectionLoadedMessages || !data.collectionLoadedMessages.size) throw new Error('No messages, no attachments! Simple as that!');
     
     const messages = data.collectionLoadedMessages;
-    const allAttachments = new Discord.Collection();
+    const allAttachments = new Collection();
 
     messages.each((m, sfm) => {
 
@@ -407,8 +412,8 @@ const dl = {
     if (!channelstring && scanChannels.size === 1) channelstring = scanChannels.first().name;
     if (!channelstring) channelstring = `${scanChannels.size}channels`;
 
-    const attachment = new Discord.MessageAttachment(htmlData, `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`);
-    return commandMessage.reply(`here you go!`, attachment)
+    const attachment = new MessageAttachment(htmlData, `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`);
+    return commandMessage.reply({ content: `Here you go!`, files: [attachment] })
       .then(() => data);
   },
 

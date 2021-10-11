@@ -1,6 +1,6 @@
 /* eslint-disable curly */
 
-// const Discord = require('discord.js');
+// const { } = require('discord.js');
 // const logger = require('winston');
 const utils = require('../utils');
 
@@ -37,7 +37,7 @@ module.exports = {
           // { name: '\u200B', value: '\u200B' },
           { name: 'Learn More', value: `\nYou can send \`${prefix}help [command name]\` to get info on a specific command!` },
         );
-      return message.channel.send(embed);
+      return message.channel.send({ embeds: [embed] });
     }
 
 
@@ -46,7 +46,7 @@ module.exports = {
     const name = args[0].toLowerCase();
     const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
 
-    if (!command) return message.reply('that\'s not a valid command!');
+    if (!command) return message.reply({ content: 'that\'s not a valid command!', ...utils.doNotNotifyReply });
 
     const usageInline = command.name !== 'download'; // handle long strings
     const embed = utils.embedTemplate(message.client);
@@ -67,7 +67,7 @@ module.exports = {
       { name: 'Arguments Required?', value: utils.titleCase(command.args), inline: true },
     );
     
-    return message.channel.send(embed);
+    return message.channel.send({ embeds: [embed] });
     
   },
 };

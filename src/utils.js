@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const { defaultPrefix, embedColor, botAttribution } = require('./configuration/config.json');
 
 const utils = {
@@ -26,14 +26,15 @@ const utils = {
   // Get Invite // Set permissions here
 
   generateInvite: (client) => client.generateInvite({
+    scopes: ['bot'], 
     permissions: [
-      'ADD_REACTIONS',
-      'VIEW_CHANNEL',
-      'SEND_MESSAGES', 
-      'EMBED_LINKS',
-      'ATTACH_FILES',
-      'READ_MESSAGE_HISTORY', 
-      'CHANGE_NICKNAME',
+      Permissions.FLAGS.ADD_REACTIONS,
+      Permissions.FLAGS.VIEW_CHANNEL,
+      Permissions.FLAGS.SEND_MESSAGES,
+      Permissions.FLAGS.EMBED_LINKS,
+      Permissions.FLAGS.ATTACH_FILES,
+      Permissions.FLAGS.READ_MESSAGE_HISTORY,
+      Permissions.FLAGS.CHANGE_NICKNAME,
     ],
   }),
 
@@ -67,49 +68,43 @@ const utils = {
 
   // Messaging / Editing
 
-  replyOrEdit: async (originalMessage, newMessage, content, checkWasReply = true) => {
-    let c = content;
+  replyOrEdit: async (originalMessage, newMessage, content, ping = false) => {
+    let c = { content };
+    if (!ping) c = { ...c, ...utils.doNotNotifyReply };
     if (!newMessage) return originalMessage.reply(c);
     if (!newMessage.editable) return newMessage;
-    if (checkWasReply) {
-      const tokens = newMessage.content.split(/[, ]+/);
-      const firstToken = tokens.shift();
-      const wasReply = firstToken.match(utils.USER_REGEX);
-      if (wasReply) c = `${firstToken}, ${c}`;
-    }
     return newMessage.edit(c);
   },
 
-  sendOrEdit: async (channel, newMessage, content, checkWasReply = true) => {
-    let c = content;
-    if (!newMessage) return channel.send(c);
+  sendOrEdit: async (channel, newMessage, content) => {
+    if (!newMessage) return channel.send({ content });
     if (!newMessage.editable) return newMessage;
-    if (checkWasReply) {
-      const tokens = newMessage.content.split(/[, ]+/);
-      const firstToken = tokens.shift();
-      const wasReply = firstToken.match(utils.USER_REGEX);
-      if (wasReply) c = `${firstToken}, ${c}`;
-    }
-    return newMessage.edit(c);
+    return newMessage.edit({ content });
   },
 
   appendEdit: async (message, content) => {
     if (!message) return message;
     if (!message.editable) return message;
-    return message.edit(message.content + content);
+    return message.edit({ content: (message.content + content) });
   },
 
   deleteMessage: (message, ms = 0) => {
-    if (!message) return;
-    if (!message.deletable || message.deleted) return;
-    message.delete({ timeout: ms });
+    if (!message) return null;
+    if (!message.deletable || message.deleted) return null;
+    return utils.sleep(ms).then(() => message.delete());
+  },
+
+  doNotNotifyReply: {
+    allowedMentions: { 
+      repliedUser: false, 
+    },
   },
 
 
   // Embeds
 
   embedTemplate: (client) => {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
       .setAuthor(client.user.username, client.user.avatarURL())
       .setColor(embedColor)
       .setTimestamp();
