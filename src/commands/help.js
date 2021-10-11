@@ -4,7 +4,7 @@
 // const logger = require('winston');
 const utils = require('../utils');
 
-const { prefix } = require('../configuration/config.json');
+const prefix = utils.checkPrefix();
 
 module.exports = {
 

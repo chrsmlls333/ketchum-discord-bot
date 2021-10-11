@@ -3,7 +3,6 @@ const client = new Discord.Client();
 
 const fs = require('fs');
 
-const { prefix } = require('./configuration/config.json');
 const logger = require('./configuration/logConfig');
 const utils = require('./utils');
 
@@ -12,6 +11,8 @@ const utils = require('./utils');
 
 const anonymous = utils.checkAnonymous();
 if (anonymous) logger.info('Running anonymously...');
+
+const prefix = utils.checkPrefix();
 
 // =========================================
 

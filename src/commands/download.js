@@ -18,7 +18,6 @@ const pugRender = pug.compileFile('src/templates/download.pug');
 
 const utils = require('../utils');
 const {
-  prefix,
   fetchIterationsMax, 
   fetchPageSize, 
   fetchDelay, 
@@ -28,6 +27,7 @@ const {
   botAttribution,
 } = require('../configuration/config.json');
 
+const prefix = utils.checkPrefix();
 
 
 // =======================================================================================

@@ -1,7 +1,14 @@
 const Discord = require('discord.js');
-const { embedColor, botAttribution } = require('./configuration/config.json');
+const { defaultPrefix, embedColor, botAttribution } = require('./configuration/config.json');
 
 const utils = {
+
+  // check Prefix setting
+
+  checkPrefix: () => {
+    const p = process.env.PREFIX || defaultPrefix;
+    return p;
+  },
 
   // check Anonymous Mode
 
