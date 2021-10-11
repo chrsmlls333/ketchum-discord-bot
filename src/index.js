@@ -16,7 +16,7 @@ if (anonymous) logger.info('Running anonymously...');
 // =========================================
 
 client.commands = new Discord.Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
 commandFiles.forEach(file => {
   // eslint-disable-next-line import/no-dynamic-require, global-require
   const command = require(`./commands/${file}`); 

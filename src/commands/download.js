@@ -14,7 +14,7 @@ dayjs.extend(require('dayjs/plugin/isSameOrAfter'));
 const chrono = require('chrono-node');
 
 const pug = require('pug');
-const pugRender = pug.compileFile('templates/download.pug');
+const pugRender = pug.compileFile('src/templates/download.pug');
 
 const utils = require('../utils');
 const {

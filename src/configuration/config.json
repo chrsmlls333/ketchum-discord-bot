@@ -10,7 +10,7 @@
 
     "htmlDebugPath": "logs/debug.html",
 
-    "cssFilePath": "assets/bootstrap/4.4.1/css/bootstrap.min.css",
+    "cssFilePath": "src/assets/bootstrap/4.4.1/css/bootstrap.min.css",
 
     "botAttribution": {
         "name": "Ketchum Bot for Discord",
