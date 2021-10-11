@@ -109,7 +109,8 @@ client.on('message', async message => {
   } catch (error) {
     // if (error.message) logger.error(error.message);
     logger.error(error.stack);
-    await message.reply(error.message ? error.message : 'there was an error trying to execute that command!');
+    const defaultErrorMessage = 'there was an error trying to execute that command!';
+    await message.reply(`${error.name}: ${error.message ? error.message : defaultErrorMessage}`);
   }
 
 });
