@@ -1,6 +1,12 @@
 # Changelog
 
-## v0.4.2 - 2021-11-10
+
+## [v0.4.3](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.2...v0.4.3) - 2021-11-10
+### Fixes
+- Versions updated according to npm audit
+
+
+## [v0.4.2](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.1...v0.4.2) - 2021-11-10
 ### Changes
 - Minor additions to error reporting
 - Organize source files, should be no noticeable difference
@@ -10,12 +16,12 @@
 - Heroku node & npm versions were floating
 
 
-## v0.4.1 - 2020-11-27
+## [v0.4.1](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.0...v0.4.1) - 2020-11-27
 ### Fixes
 - Adjust github link in config to updated repo name
 
 
-## v0.4.0 - 2020-11-27
+## [v0.4.0](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.3.0...v0.4.0) - 2020-11-27
 ### Additions
 - Added download#parsetime natural language parameter using `chrono-node`
   - Interpretation
@@ -34,7 +40,7 @@
 - Refactors to make parameter object diving clear
 
 
-## v0.3.0 - 2020-11-27
+## [v0.3.0](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.2.0...v0.3.0) - 2020-11-27
 ### Additions
 - Add MIT License
 - Local asset injection for Bootstrap v4.4.1 CSS, 
@@ -55,7 +61,7 @@
 - Prepare for natural language time interpretation in next version
 
 
-## v0.2.0 - 2020-04-05
+## [v0.2.0](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.1.0...v0.2.0) - 2020-04-05
 ### Additions
 - Add `invite` Command
 ### Changes

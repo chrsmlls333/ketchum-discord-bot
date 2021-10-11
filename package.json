@@ -1,6 +1,6 @@
 {
   "name": "ketchum-discord-bot",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "src/index.js",
   "scripts": {
