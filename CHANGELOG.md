@@ -1,12 +1,23 @@
 # Changelog
 
+## [v0.5.0](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.3...v0.5.0) - 2021-10-11
+### Additions
+- Added `PREFIX` environment variable
+  - Allows to override the config variable for setting command prefix
+### Changes
+- Upgrade to Node 16.11, with >=16.6 being a requirement.
+- Upgrade to discord.js v13, which had a lot of changes.
+### Fixes
+- Fixed #21 during upgrade, not verified or tested so leaving issue open.
+- Fix changelog dates.
 
-## [v0.4.3](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.2...v0.4.3) - 2021-11-10
+
+## [v0.4.3](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.2...v0.4.3) - 2021-10-10
 ### Fixes
 - Versions updated according to npm audit
 
 
-## [v0.4.2](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.1...v0.4.2) - 2021-11-10
+## [v0.4.2](https://github.com/chrsmlls333/ketchum-discord-bot/compare/v0.4.1...v0.4.2) - 2021-10-10
 ### Changes
 - Minor additions to error reporting
 - Organize source files, should be no noticeable difference
