@@ -4,9 +4,15 @@
 
 > Simple Discord bot to download all images and files with attribution (hopefully). Supports specifying channels, users, and time ranges (time in natural language).
 
+## Note
+
+Requires the Message Contents Privileged Intent on the Discord Developer Portal!
+Slash Commands are not yet implemented.
+
 ## Install
 
-0. `nvm install 16.6`
+0. Install NVM, then
+   - `npx nvm-auto`
 1. Build `npm install`
 2. Optional but recommended: `npm install pm2 -g`
 3. Prepare your environment variable or `.env`
@@ -22,8 +28,7 @@ TODO: Document tasks/debug processes
 
 ## Update
 
-1. `npm install -g npm-check-updates`
-2. `ncu [-u]`
+`npx npm-check-updates [-u]`
 
 ## Using the Lists
 

@@ -1,4 +1,4 @@
-const { Collection, MessageAttachment } = require('discord.js');
+const { Collection, AttachmentBuilder } = require('discord.js');
 
 const logger = require('winston');
 
@@ -412,7 +412,12 @@ const dl = {
     if (!channelstring && scanChannels.size === 1) channelstring = scanChannels.first().name;
     if (!channelstring) channelstring = `${scanChannels.size}channels`;
 
-    const attachment = new MessageAttachment(htmlData, `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`);
+    const attachment = new AttachmentBuilder(
+      htmlData, 
+      { 
+        name: `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`,
+      }
+    );
     return commandMessage.reply({ content: `Here you go!`, files: [attachment] })
       .then(() => data);
   },

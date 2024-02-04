@@ -1,4 +1,4 @@
-const { MessageEmbed, Permissions } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField, Client, OAuth2Scopes } = require('discord.js');
 const { defaultPrefix, embedColor, botAttribution } = require('./configuration/config.json');
 
 const utils = {
@@ -24,17 +24,22 @@ const utils = {
   },
 
   // Get Invite // Set permissions here
-
+  /**
+   * @param {Client} client 
+   * @returns {string}
+   */
   generateInvite: (client) => client.generateInvite({
-    scopes: ['bot'], 
+    scopes: [
+      OAuth2Scopes.Bot
+    ], 
     permissions: [
-      Permissions.FLAGS.ADD_REACTIONS,
-      Permissions.FLAGS.VIEW_CHANNEL,
-      Permissions.FLAGS.SEND_MESSAGES,
-      Permissions.FLAGS.EMBED_LINKS,
-      Permissions.FLAGS.ATTACH_FILES,
-      Permissions.FLAGS.READ_MESSAGE_HISTORY,
-      Permissions.FLAGS.CHANGE_NICKNAME,
+      PermissionsBitField.Flags.ChangeNickname,
+      PermissionsBitField.Flags.ViewChannel,
+      PermissionsBitField.Flags.SendMessages,
+      PermissionsBitField.Flags.EmbedLinks,
+      PermissionsBitField.Flags.AttachFiles,
+      PermissionsBitField.Flags.ReadMessageHistory,
+      PermissionsBitField.Flags.AddReactions,
     ],
   }),
 
@@ -104,13 +109,22 @@ const utils = {
   // Embeds
 
   embedTemplate: (client) => {
-    const embed = new MessageEmbed()
-      .setAuthor(client.user.username, client.user.avatarURL())
+    const embed = new EmbedBuilder()
+      .setAuthor({ 
+        name: client.user.username, 
+        iconURL: client.user.avatarURL() 
+      })
       .setColor(embedColor)
       .setTimestamp();
     if (!utils.checkAnonymous()) {
-      embed.setAuthor(client.user.username, client.user.avatarURL(), botAttribution.github);
-      embed.setFooter(botAttribution.name);
+      embed.setAuthor({
+        name: client.user.username,
+        iconURL: client.user.avatarURL(),
+        url: botAttribution.github,
+      });
+      embed.setFooter({
+        text: botAttribution.name
+      });
     }
     return embed;
   },

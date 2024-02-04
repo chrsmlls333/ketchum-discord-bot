@@ -1,11 +1,14 @@
 const { 
   Client, 
-  Intents, 
+  GatewayIntentBits, 
+  Partials,
   Collection, 
-  Permissions, 
+  Events,
+  ChannelType,
+  PermissionsBitField
 } = require('discord.js');
 
-const fs = require('fs');
+const fs = require('node:fs');
 
 const logger = require('./configuration/logConfig');
 
@@ -13,20 +16,26 @@ const utils = require('./utils');
 const anonymous = utils.checkAnonymous();
 if (anonymous) logger.info('Running anonymously...');
 const prefix = utils.checkPrefix();
+logger.info(`Using prefix: ${prefix}`);
 
 
 // =========================================
 
 const client = new Client({ 
   intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILD_INVITES,
-    Intents.FLAGS.DIRECT_MESSAGES,
-    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-    Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildInvites,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMessageTyping,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageReactions,
+    GatewayIntentBits.DirectMessageTyping,
   ], 
-  partials: ['CHANNEL'], // handle DMs
+  partials: [
+    Partials.Channel, // handle DMs
+  ], 
 });
 
 
@@ -44,17 +53,17 @@ const cooldowns = new Collection();
 
 // =========================================
 
-client.on('ready', async () => {
-  logger.info(`I am ready! Logged in as ${client.user.tag}!`);
-  logger.info(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`); 
+client.once(Events.ClientReady, async (readyClient) => {
+  logger.info(`I am ready! Logged in as ${readyClient.user.tag}!`);
+  logger.info(`Bot has started, with ${readyClient.users.cache.size} users, in ${readyClient.channels.cache.size} channels of ${readyClient.guilds.cache.size} guilds.`); 
 
   // client.user.setActivity('the upright organ');
-  const link = utils.generateInvite(client);
+  const link = utils.generateInvite(readyClient);
   logger.info(`Generated bot invite link: ${link}`);
 });
 
 
-client.on('guildCreate', guild => {
+client.on(Events.GuildCreate, guild => {
   const embed = utils.embedTemplate(client)
     .setTitle('Thanks for adding me to your server!')
     .setDescription(`I'm a downloader bot which can pull attachments and embeds into a big list to download later. \n\nFor a list of commands, send \`${prefix}help [command name]\` here or in your server!`);
@@ -63,8 +72,7 @@ client.on('guildCreate', guild => {
 });
 
 
-client.on('messageCreate', async message => {
-
+client.on(Events.MessageCreate, async message => {
   // Check message for basic validity
   if (
     !message.content.startsWith(prefix) || 
@@ -72,8 +80,8 @@ client.on('messageCreate', async message => {
   ) return;
 
   if (!message.partial) { // if not a DM
-    const perms = await message.channel.permissionsFor(client.user);
-    if (!perms.has(Permissions.FLAGS.SEND_MESSAGES)) return;
+    const perms = message.channel.permissionsFor(client.user);
+    if (!perms.has(PermissionsBitField.Flags.SendMessages)) return;
   }
   
   // Parse command
@@ -87,7 +95,7 @@ client.on('messageCreate', async message => {
   // Log received command!
   logger.debug(`${message.guild.name} #${message.channel.name}: '${message.content}'`); 
 
-  if (command.guildOnly && message.channel.type !== 'GUILD_TEXT') {
+  if (command.guildOnly && message.channel.type !== ChannelType.GuildText) {
     message.reply({ content: 'I can\'t execute that command inside DMs!', ...utils.doNotNotifyReply });
     return;
   }

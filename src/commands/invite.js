@@ -17,14 +17,10 @@ module.exports = {
   usage: null,
   
   execute(message) {
-
-    utils.generateInvite(message.client)
-      .then(link => {
-        const embed = utils.embedTemplate(message.client)
-          .setTitle(`Invite ${message.client.user.username} to other servers!`)
-          .setURL(link);
-        return message.channel.send({ embeds: [embed] });
-      });
-    
+    const link = utils.generateInvite(message.client)
+    const embed = utils.embedTemplate(message.client)
+      .setTitle(`Invite ${message.client.user.username} to other servers!`)
+      .setURL(link);
+    return message.channel.send({ embeds: [embed] });
   },
 };

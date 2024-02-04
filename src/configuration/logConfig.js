@@ -22,8 +22,9 @@ winston.configure({
       filename: 'logs/output.log', 
       level: 'debug',
       format: winston.format.combine( 
+        winston.format.errors({ stack: true }),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.json(),
+        winston.format.prettyPrint(),
       ),
     }),
   ],
