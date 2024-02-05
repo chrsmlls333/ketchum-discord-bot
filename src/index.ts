@@ -23,10 +23,10 @@ const client = new Client({
 
 import logger from './logger';
 
-import utils from './utils';
-const anonymous = utils.checkAnonymous();
+import { checkAnonymous, checkPrefix } from './utils';
+const anonymous = checkAnonymous();
 if (anonymous) logger.info('Running anonymously...');
-const prefix = utils.checkPrefix();
+const prefix = checkPrefix();
 logger.info(`Using prefix: ${prefix}`);
 
 import { Command, SlashCommand } from './types';

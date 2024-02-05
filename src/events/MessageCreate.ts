@@ -2,7 +2,7 @@ import { ChannelType, Client, Events } from 'discord.js';
 import { BotEvent } from '../types';
 
 import logger from '../logger';
-import utils from '../utils';
+import { checkPrefix, doNotNotifyReply } from '../utils';
 
 const event: BotEvent = {
   name: Events.MessageCreate,
@@ -12,7 +12,7 @@ const event: BotEvent = {
       // Check message for basic validity
       if (!message.member || message.member.user.bot) return;
       if (!message.guild) return;
-      const prefix = utils.checkPrefix();
+      const prefix = checkPrefix();
       if (!message.content.startsWith(prefix)) return;
       if (message.channel.type !== ChannelType.GuildText) return;
 
@@ -33,7 +33,7 @@ const event: BotEvent = {
       logger.debug(`${message.guild.name} #${message.channel.name}: '${message.content}'`);
 
       if (command.guildOnly && message.channel.type !== ChannelType.GuildText) {
-        message.reply({ content: 'I can\'t execute that command outside a Guild!', ...utils.doNotNotifyReply });
+        message.reply({ content: 'I can\'t execute that command outside a Guild!', ...doNotNotifyReply });
         return;
       }
 
@@ -41,7 +41,7 @@ const event: BotEvent = {
       if (command.args && !args.length) {
         let reply = `You didn't provide any arguments, ${message.author.username}!`;
         if (command.usage) reply += `\nThe proper usage would be: \`${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}\``;
-        message.reply({ content: reply, ...utils.doNotNotifyReply });
+        message.reply({ content: reply, ...doNotNotifyReply });
         return;
       }
 
@@ -61,7 +61,7 @@ const event: BotEvent = {
         const defaultErrorMessage = 'there was an error trying to execute that command!';
         await message.reply({
           content: `${error.name}: ${error.message ? error.message : defaultErrorMessage}`,
-          ...utils.doNotNotifyReply,
+          ...doNotNotifyReply,
         });
       }
 
