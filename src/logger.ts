@@ -1,4 +1,4 @@
-const winston = require('winston');
+import winston from 'winston';
 
 winston.configure({
   // level: 'info',
@@ -35,4 +35,4 @@ winston.configure({
   ],
 });
 
-module.exports = winston;
+export default winston;
