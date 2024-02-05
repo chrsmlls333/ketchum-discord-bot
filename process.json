@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "ketchum-discord-bot",
+      "script": "build/index.js",
+      "node_args": ["--enable-source-maps"],
+      "autorestart": true,
+      "watch": false, 
+      "restart_delay": 10000
+    }
+  ]
+}

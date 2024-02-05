@@ -13,6 +13,8 @@ Slash Commands are not yet implemented.
 
 0. Install NVM, then
    - `npx nvm-auto`
+0. `npm install -g ts-node typescript '@types/node'`
+0. ``
 1. Build `npm install`
 2. Optional but recommended: `npm install pm2 -g`
 3. Prepare your environment variable or `.env`

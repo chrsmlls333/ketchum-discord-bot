@@ -4,11 +4,19 @@
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "src/index.js",
   "scripts": {
-    "start:basic": "node -r dotenv/config .",
-    "start:debug": "./node_modules/pm2/bin/pm2-runtime pm2.dev.json",
-    "kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
-    "start": "./node_modules/pm2/bin/pm2-runtime pm2.prod.json",
-    "lint": "eslint .",
+
+    "old:start:debug": "./node_modules/pm2/bin/pm2-runtime pm2.dev.json",
+    "old:kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
+    "build": "tsc",
+    "start:dev": "ts-node src/index.ts",
+    "start:watch": "nodemon src/index.ts",
+    "start:built": "npm run build && node build/index.js",
+    "start:pm2": "npm run build && npm run pm2:start",
+    "pm2:start": "pm2 start process.json",
+    "pm2:stop": "pm2 stop process.json",
+    "pm2:delete": "pm2 delete process.json",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "pug:dev": "pug -w ./src/templates -o ./src/templates/html/ -P"
   },
   "author": "Chris Mills",
@@ -23,8 +31,14 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
     "eslint": "^8.56.0",
-    "eslint-plugin-import": "^2.29.1"
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": "^18"

@@ -1,7 +1,0 @@
-{
-  "name": "ketchum-downloader",
-  "script": "src/index.js",
-  "node_args": ["--require", "dotenv/config"],
-  "autorestart": true,
-  "watch": false
-}
