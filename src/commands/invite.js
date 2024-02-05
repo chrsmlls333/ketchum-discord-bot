@@ -1,6 +1,5 @@
 // const { } = require('discord.js');
 // const logger = require('winston');
-
 const utils = require('../utils');
 
 
@@ -15,9 +14,9 @@ module.exports = {
 
   args: false,
   usage: null,
-  
+
   execute(message) {
-    const link = utils.generateInvite(message.client)
+    const link = utils.generateInvite(message.client);
     const embed = utils.embedTemplate(message.client)
       .setTitle(`Invite ${message.client.user.username} to other servers!`)
       .setURL(link);

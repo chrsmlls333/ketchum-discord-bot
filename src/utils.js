@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, Client, OAuth2Scopes } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField, OAuth2Scopes } = require('discord.js');
 const { defaultPrefix, embedColor, botAttribution } = require('./configuration/config.json');
 
 const utils = {
@@ -25,13 +25,13 @@ const utils = {
 
   // Get Invite // Set permissions here
   /**
-   * @param {Client} client 
+   * @param {Client} client
    * @returns {string}
    */
   generateInvite: (client) => client.generateInvite({
     scopes: [
-      OAuth2Scopes.Bot
-    ], 
+      OAuth2Scopes.Bot,
+    ],
     permissions: [
       PermissionsBitField.Flags.ChangeNickname,
       PermissionsBitField.Flags.ViewChannel,
@@ -100,8 +100,8 @@ const utils = {
   },
 
   doNotNotifyReply: {
-    allowedMentions: { 
-      repliedUser: false, 
+    allowedMentions: {
+      repliedUser: false,
     },
   },
 
@@ -110,9 +110,9 @@ const utils = {
 
   embedTemplate: (client) => {
     const embed = new EmbedBuilder()
-      .setAuthor({ 
-        name: client.user.username, 
-        iconURL: client.user.avatarURL() 
+      .setAuthor({
+        name: client.user.username,
+        iconURL: client.user.avatarURL(),
       })
       .setColor(embedColor)
       .setTimestamp();
@@ -123,7 +123,7 @@ const utils = {
         url: botAttribution.github,
       });
       embed.setFooter({
-        text: botAttribution.name
+        text: botAttribution.name,
       });
     }
     return embed;
@@ -132,10 +132,10 @@ const utils = {
 
   // String Functions
 
-  titleCase: (str) => { 
-    if ((str === null) || (str === '')) return str; 
-    const s = str.toString(); 
-    return s.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); 
+  titleCase: (str) => {
+    if ((str === null) || (str === '')) return str;
+    const s = str.toString();
+    return s.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
   },
 
 

@@ -1,5 +1,3 @@
-/* eslint-disable curly */
-
 // const { } = require('discord.js');
 // const logger = require('winston');
 const utils = require('../utils');
@@ -17,7 +15,7 @@ module.exports = {
 
   args: false,
   usage: '[command name or alias]',
-  
+
   execute(message, args) {
 
     const data = [];
@@ -54,20 +52,23 @@ module.exports = {
     embed.addFields(
       { name: 'Command Name', value: `${prefix}${command.name}`, inline: true },
     );
-    if (command.aliases && command.aliases.length) embed.addFields(
-      { name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}`, inline: true },
-    );
-    if (command.cancelAliases && command.cancelAliases.length) embed.addFields(
-      { name: 'Cancel With', value: `${command.cancelAliases.map(a => prefix + a).join(', ')}`, inline: true },
-    );
+    if (command.aliases && command.aliases.length) {
+      embed.addFields(
+        { name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}`, inline: true },
+      );
+    }
+    if (command.cancelAliases && command.cancelAliases.length) {
+      embed.addFields(
+        { name: 'Cancel With', value: `${command.cancelAliases.map(a => prefix + a).join(', ')}`, inline: true },
+      );
+    }
     embed.addFields(
       { name: 'Description', value: `${command.description}` },
       // { name: '\u200B', value: '\u200B' },
       { name: 'Usage', value: `${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}`, inline: usageInline },
       { name: 'Arguments Required?', value: utils.titleCase(command.args), inline: true },
     );
-    
+
     return message.channel.send({ embeds: [embed] });
-    
   },
 };

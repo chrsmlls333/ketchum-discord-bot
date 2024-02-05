@@ -18,9 +18,9 @@ const pugRender = pug.compileFile('src/templates/download.pug');
 
 const utils = require('../utils');
 const {
-  fetchIterationsMax, 
-  fetchPageSize, 
-  fetchDelay, 
+  fetchIterationsMax,
+  fetchPageSize,
+  fetchDelay,
   statusMessageDeleteDelay,
   htmlDebugPath,
   cssFilePath,
@@ -47,10 +47,10 @@ const dl = {
 
   args: true,
   usage: '[...#channel, here, this, all, any] [@user] [time]',
-  
-  
+
+
   // Parse command arguments ======================================================
-  
+
   parseChannel: async (data) => {
     const { scanChannels, commandMessage: m, commandMessageArgs: a } = data;
     let { allChannels } = data;
@@ -73,7 +73,7 @@ const dl = {
       }
       if (!c) break; // Nothing found
       channelsFound.set(c.id, c);
-      a.shift(); 
+      a.shift();
     }
 
     if (!channelsFound.size) throw new Error("I don't see a channel mention, or all/here/this, sorry!");
@@ -97,8 +97,8 @@ const dl = {
       const u = utils.getUserFromMention(m, arg);
       if (!u) {
         if (utils.isRoleFromMention(arg)) {
-          m.reply({ 
-            content: "I don't know what to do with roles and bots. Ignoring that bit!", 
+          m.reply({
+            content: "I don't know what to do with roles and bots. Ignoring that bit!",
             ...utils.doNotNotifyReply,
           });
         }
@@ -107,7 +107,7 @@ const dl = {
       usersFound.set(u.id, u);
       a.shift();
     }
-    
+
     if (!usersFound.size) {
       // await m.reply("I don't see a user mention, but that's fine I guess!");
       return data;
@@ -141,10 +141,10 @@ const dl = {
 
   spoutUnderstanding: async (data) => {
     // Reply with plain english understanding of command
-    const { 
-      commandMessage: m, 
-      scanChannels: c, 
-      scanUsers: u, 
+    const {
+      commandMessage: m,
+      scanChannels: c,
+      scanUsers: u,
       allChannels: all,
       scanDateLimit: d,
     } = data;
@@ -181,7 +181,7 @@ const dl = {
         scanUsers,
         scanDateLimit,
       } = fetchData;
-      let { 
+      let {
         iterations,
         earliestSnowflake,
         collectedTotal,
@@ -196,7 +196,7 @@ const dl = {
         utils.deleteMessage(statusMessage);
         throw new Error('I\'m cancelling!');
       }
-      
+
       // CHECK FOR NOTHING / END / MAXLOOP / TIME
       const noMessages = !messages.size;
       const reachedDebugMax = fetchIterationsMax && i > fetchIterationsMax;
@@ -236,8 +236,8 @@ const dl = {
         if (m.attachments.size) return true;
         if (m.embeds.length) return m.embeds.some(e => new RegExp('image|video').test(e.type));
         return false;
-      }); 
-      
+      });
+
       // Filter for specced users
       if (scanUsers && scanUsers.size) {
         creme = creme.filter(m => scanUsers.some(u => u.id === m.author.id));
@@ -251,9 +251,9 @@ const dl = {
       // UPDATE DATA /////////////////////////////////////////////////////////////
       collectedTotal += messages.size;
       collectionFiltered = collectionFiltered.concat(creme);
-      
+
       // REPORT AND LOOP
-      return utils.replyOrEdit(commandMessage, statusMessage, 
+      return utils.replyOrEdit(commandMessage, statusMessage,
         `for ${scanChannels.get(currentChannelId)} I see ${collectionFiltered.size}/${collectedTotal} results here from ${i}${fetchIterationsMax ? `/${fetchIterationsMax}` : ''} pass${i !== 1 ? 'es' : ''}!`)
         .then(message => ({
           ...fetchData,
@@ -272,32 +272,32 @@ const dl = {
 
     // Setup cancelling by command
     const cancelRegex = new RegExp(`^\\${prefix}(${dl.cancelAliases.join('|')})$`, 'i');
-    const filter = m => cancelRegex.test(m.content) && 
+    const filter = m => cancelRegex.test(m.content) &&
                         m.author.id === data.commandMessage.author.id;
     const cancelCollector = (
       data.commandMessage.channel.createMessageCollector({ filter, max: 1 })
     );
     cancelCollector.on('collect', m => logger.debug(`Collected ${m.content}`));
-    
+
     // Start Per-Channel Fetch in Parallel
     const fetches = data.scanChannels.map((c, k) => {
       const fetchInitData = {
         commandMessage: data.commandMessage,
         commandMessageArgs: data.commandMessageArgs,
         statusMessage: null,
-        
+
         scanChannels: data.scanChannels && data.scanChannels.clone(),
         currentChannelId: k,
         scanUsers: data.scanUsers && data.scanUsers.clone(),
         scanDateLimit: data.scanDateLimit,
-      
+
         iterations: 0,
-        
+
         collectedTotal: 0,
         collectionFiltered: new Collection(),
 
         cancelCollector,
-        
+
         earliestSnowflake: null,
       };
 
@@ -308,7 +308,7 @@ const dl = {
       // stop cancel watch
       cancelCollector.stop();
 
-      // delete all statusMessages 
+      // delete all statusMessages
       // const statusMessages = fetchResults.map(f => f.statusMessage);
       // eslint-disable-next-line max-len
       // setTimeout(() => data.commandMessage.channel.bulkDelete(statusMessages), statusMessageDeleteDelay);
@@ -328,7 +328,7 @@ const dl = {
 
   buildLinkCollection: (data) => {
     if (!data.collectionLoadedMessages || !data.collectionLoadedMessages.size) throw new Error('No messages, no attachments! Simple as that!');
-    
+
     const messages = data.collectionLoadedMessages;
     const allAttachments = new Collection();
 
@@ -391,8 +391,8 @@ const dl = {
 
   distributeHTMLData: (data) => {
     const {
-      html, 
-      commandMessage, 
+      html,
+      commandMessage,
       scanChannels,
       allChannels: all,
     } = data;
@@ -406,18 +406,15 @@ const dl = {
         logger.error('No luck writin\' them files then? Its just the one file, actually...');
         logger.error(error.stack);
       });
-    
+
     let channelstring = null;
     if (all) channelstring = 'all';
     if (!channelstring && scanChannels.size === 1) channelstring = scanChannels.first().name;
     if (!channelstring) channelstring = `${scanChannels.size}channels`;
 
-    const attachment = new AttachmentBuilder(
-      htmlData, 
-      { 
-        name: `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`,
-      }
-    );
+    const attachment = new AttachmentBuilder(htmlData, {
+      name: `${commandMessage.guild.name.replace(' ', '')}_${channelstring}_attachments.html`,
+    });
     return commandMessage.reply({ content: `Here you go!`, files: [attachment] })
       .then(() => data);
   },
@@ -430,7 +427,7 @@ const dl = {
     const initData = {
       commandMessage: _message,
       commandMessageArgs: _args,
-    
+
       scanChannels: null,
       allChannels: false,
       scanUsers: null,
@@ -439,10 +436,10 @@ const dl = {
       collectionLoadedMessages: null,
       collectionMedia: null,
       collectedTotal: 0,
-      
+
       html: null,
     };
-    
+
     return Promise.resolve(initData)
       .then(dl.parseChannel)
       .then(dl.parseUser)

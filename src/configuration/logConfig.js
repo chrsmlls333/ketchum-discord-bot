@@ -5,7 +5,7 @@ winston.configure({
   // format: winston.format.json(),
   // defaultMeta: { service: 'user-service' },
   transports: [
-    new winston.transports.Console({ 
+    new winston.transports.Console({
       level: 'debug',
       format: winston.format.combine(
         // winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -18,10 +18,10 @@ winston.configure({
     // - Write all logs with level `info` and below to `combined.log`
     //
     // new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ 
-      filename: 'logs/output.log', 
+    new winston.transports.File({
+      filename: 'logs/output.log',
       level: 'debug',
-      format: winston.format.combine( 
+      format: winston.format.combine(
         winston.format.errors({ stack: true }),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         winston.format.prettyPrint(),
@@ -29,7 +29,7 @@ winston.configure({
     }),
   ],
   exceptionHandlers: [
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: 'logs/exceptions.log',
     }),
   ],
