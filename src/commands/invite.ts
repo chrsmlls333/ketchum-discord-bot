@@ -1,25 +1,26 @@
-// const { } = require('discord.js');
-// const logger = require('winston');
-const utils = require('../utils');
+import type { Command } from "../types";
+import { embedTemplate, generateInvite } from "../utils";
 
 
-module.exports = {
+const invite: Command = {
 
   name: 'invite',
   aliases: ['getinvite'],
 
   description: 'Get a link for inviting this bot to another server you have Manage Server permissions on...',
-
+  
   guildOnly: false,
 
   args: false,
-  usage: null,
+  usage: undefined,
 
   execute(message) {
-    const link = utils.generateInvite(message.client);
-    const embed = utils.embedTemplate(message.client)
+    const link = generateInvite(message.client);
+    const embed = embedTemplate(message.client)
       .setTitle(`Invite ${message.client.user.username} to other servers!`)
       .setURL(link);
     return message.channel.send({ embeds: [embed] });
   },
 };
+
+export default invite;

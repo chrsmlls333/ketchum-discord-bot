@@ -15,11 +15,10 @@ export interface Command {
   description?: string,
   usage?: string,
   permissions?: Array<PermissionResolvable>,
-  guildOnly: boolean,
+  guildOnly?: boolean,
   args: boolean,
   cooldown?: number,
   execute: (message: Message, args: Array<string>) => void,
-
 }
 
 export interface BotEvent {

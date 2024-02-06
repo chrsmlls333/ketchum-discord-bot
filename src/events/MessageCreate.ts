@@ -32,7 +32,10 @@ const event: BotEvent = {
       // Log received command!
       logger.debug(`${message.guild.name} #${message.channel.name}: '${message.content}'`);
 
-      if (command.guildOnly && message.channel.type !== ChannelType.GuildText) {
+      if (
+        (typeof command.guildOnly === 'undefined' || command.guildOnly) && 
+        message.channel.type !== ChannelType.GuildText
+      ) {
         message.reply({ content: 'I can\'t execute that command outside a Guild!', ...doNotNotifyReply });
         return;
       }

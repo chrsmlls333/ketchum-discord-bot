@@ -1,16 +1,15 @@
-// const { } = require('discord.js');
-// const logger = require('winston');
-const utils = require('../utils');
+import type { Command } from "../types";
+import { checkPrefix, embedTemplate, doNotNotifyReply, titleCase } from "../utils";
+const prefix = checkPrefix();
 
-const prefix = utils.checkPrefix();
 
-module.exports = {
+const help: Command = {
 
   name: 'help',
   aliases: ['h', 'commands'],
 
   description: 'List all of my commands or info about a specific command.',
-
+  
   guildOnly: false,
 
   args: false,
@@ -27,7 +26,7 @@ module.exports = {
       data.push(commands.map(command => command.name).join(', '));
       data.push(`\nYou can send \`${prefix}help [command name]\` to get info on a specific command!`);
 
-      const embed = utils.embedTemplate(message.client) // Makes a pretty embed
+      const embed = embedTemplate(message.client) // Makes a pretty embed
         .setTitle('Here are all of my commands...')
         // .setDescription('Here are all of my commands...')
         .addFields(
@@ -44,11 +43,11 @@ module.exports = {
     const name = args[0].toLowerCase();
     const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
 
-    if (!command) return message.reply({ content: 'that\'s not a valid command!', ...utils.doNotNotifyReply });
+    if (!command) return message.reply({ content: 'that\'s not a valid command!', ...doNotNotifyReply });
 
     const usageInline = command.name !== 'download'; // handle long strings
-    const embed = utils.embedTemplate(message.client);
-    embed.setTitle(utils.titleCase(command.name));
+    const embed = embedTemplate(message.client);
+    embed.setTitle(titleCase(command.name));
     embed.addFields(
       { name: 'Command Name', value: `${prefix}${command.name}`, inline: true },
     );
@@ -66,9 +65,11 @@ module.exports = {
       { name: 'Description', value: `${command.description}` },
       // { name: '\u200B', value: '\u200B' },
       { name: 'Usage', value: `${prefix}${command.name}${command.usage ? ` ${command.usage}` : ''}`, inline: usageInline },
-      { name: 'Arguments Required?', value: utils.titleCase(command.args), inline: true },
+      { name: 'Arguments Required?', value: titleCase(command.args.toString()), inline: true },
     );
 
     return message.channel.send({ embeds: [embed] });
   },
 };
+
+export default help;
