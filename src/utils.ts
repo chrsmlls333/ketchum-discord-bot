@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionsBitField, OAuth2Scopes, Client, Message, ChannelMention, UserMention, RoleMention, TextChannel } from 'discord.js';
+import { EmbedBuilder, PermissionsBitField, OAuth2Scopes, Client, Message, TextChannel } from 'discord.js';
 
 import { defaultPrefix, embedColor, botAttribution } from './configuration/config.json';
 
@@ -42,32 +42,30 @@ const CHAN_REGEX = /^<#(\d+)>$/;
 const USER_REGEX = /^<@!?(\d+)>$/;
 const ROLE_REGEX = /^<@&(\d+)>$/;
 
-export const isChannelFromMention = (mention: ChannelMention) => mention.match(CHAN_REGEX) !== null;
+export const isChannelFromMention = (mention: string) => mention.match(CHAN_REGEX) !== null;
 
-export function getChannelFromMention(message: Message, mention: ChannelMention) {
+export function getChannelFromMention(message: Message, mention: string) {
   const matches = mention.match(CHAN_REGEX);
   if (!matches) return null;
   const id = matches[1];
-  return message.client.channels.cache.get(id);
+  return message.client.channels.cache.get(id) ?? null;
 }
 
+export const isUserFromMention = (mention: string) => mention.match(USER_REGEX) !== null;
 
-
-export const isUserFromMention = (mention: UserMention) => mention.match(USER_REGEX) !== null;
-
-export function getUserFromMention(message: Message, mention: UserMention) {
+export function getUserFromMention(message: Message, mention: string) {
   const matches = mention.match(USER_REGEX);
   if (!matches) return null;
   const id = matches[1];
-  return message.client.users.cache.get(id);
+  return message.client.users.cache.get(id) ?? null;
 }
 
-export const isRoleFromMention = (mention: RoleMention) => mention.match(ROLE_REGEX) !== null;
+export const isRoleFromMention = (mention: string) => mention.match(ROLE_REGEX) !== null;
 
 
 // Messaging / Editing
 
-export async function replyOrEdit(originalMessage: Message, newMessage: Message, content: string, ping = false) {
+export async function replyOrEdit(originalMessage: Message, newMessage: Message | undefined, content: string, ping = false) {
   let c = { content };
   if (!ping) c = { ...c, ...doNotNotifyReply };
   if (!newMessage) return originalMessage.reply(c);
@@ -75,7 +73,7 @@ export async function replyOrEdit(originalMessage: Message, newMessage: Message,
   return newMessage.edit(c);
 }
 
-export async function sendOrEdit(channel: TextChannel, newMessage: Message, content: string) {
+export async function sendOrEdit(channel: TextChannel, newMessage: Message | undefined, content: string) {
   if (!newMessage) return channel.send({ content });
   if (!newMessage.editable) return newMessage;
   return newMessage.edit({ content });
@@ -138,5 +136,5 @@ export function titleCase(str: string) {
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const sleepThenPass = <T>(ms: number) => (x: T) => new Promise(resolve => setTimeout(() => resolve(x), ms));
+export const sleepThenPass = <T>(ms: number) => (x: T) => new Promise<T>(resolve => setTimeout(() => resolve(x), ms));
 

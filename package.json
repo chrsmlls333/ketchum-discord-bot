@@ -4,7 +4,6 @@
   "description": "Simple Discord bot to download all images and files with attribution (hopefully)",
   "main": "src/index.js",
   "scripts": {
-
     "old:start:debug": "./node_modules/pm2/bin/pm2-runtime pm2.dev.json",
     "old:kill:debug": "sudo kill -9 $(sudo lsof -t -i:9229)",
     "build": "tsc",
@@ -32,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.16",
+    "@types/pug": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",
     "eslint": "^8.56.0",
