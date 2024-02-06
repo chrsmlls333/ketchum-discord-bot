@@ -6,7 +6,7 @@ export default (client: Client) => {
 
   events.forEach(event => {
     event.load(client);
-    logger.info(`Successfully loaded event: ${event.name}`);
+    logger.info(`Loaded event: ${event.name}`);
   });
 
 };

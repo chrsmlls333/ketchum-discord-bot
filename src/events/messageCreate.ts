@@ -4,7 +4,8 @@ import { BotEvent } from '../types';
 import logger from '../logger';
 import { checkPrefix, doNotNotifyReply } from '../utils';
 
-const event: BotEvent = {
+
+const messageCreate: BotEvent = {
   name: Events.MessageCreate,
   load: (client: Client) => {
     client.on(Events.MessageCreate, async message => {
@@ -74,4 +75,4 @@ const event: BotEvent = {
   },
 };
 
-export default event;
+export default messageCreate;
