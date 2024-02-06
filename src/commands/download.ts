@@ -48,8 +48,40 @@ const dl = {
   args: true,
   usage: '[...#channel, here, this, all, any] [@user] [time]',
 
+  async execute(_message, _args) {
 
-  // Parse command arguments ======================================================
+    const initData = {
+      commandMessage: _message,
+      commandMessageArgs: _args,
+
+      scanChannels: null,
+      allChannels: false,
+      scanUsers: null,
+      scanDateLimit: null,
+
+      collectionLoadedMessages: null,
+      collectionMedia: null,
+      collectedTotal: 0,
+
+      html: null,
+    };
+
+    return Promise.resolve(initData)
+      .then(steps.parseChannel)
+      .then(steps.parseUser)
+      .then(steps.parseTime)
+      .then(steps.spoutUnderstanding)
+      .then(steps.fetchChannelsCombine)
+      .then(steps.buildLinkCollection)
+      .then(steps.buildDownloadHtml)
+      .then(steps.distributeHTMLData);
+  },
+
+};
+
+// Parse command arguments ======================================================
+
+const steps = {
 
   parseChannel: async (data) => {
     const { scanChannels, commandMessage: m, commandMessageArgs: a } = data;
@@ -418,39 +450,6 @@ const dl = {
     return commandMessage.reply({ content: `Here you go!`, files: [attachment] })
       .then(() => data);
   },
-
-
-  // RUN ALL =====================================================================================
-
-  async execute(_message, _args) {
-
-    const initData = {
-      commandMessage: _message,
-      commandMessageArgs: _args,
-
-      scanChannels: null,
-      allChannels: false,
-      scanUsers: null,
-      scanDateLimit: null,
-
-      collectionLoadedMessages: null,
-      collectionMedia: null,
-      collectedTotal: 0,
-
-      html: null,
-    };
-
-    return Promise.resolve(initData)
-      .then(dl.parseChannel)
-      .then(dl.parseUser)
-      .then(dl.parseTime)
-      .then(dl.spoutUnderstanding)
-      .then(dl.fetchChannelsCombine)
-      .then(dl.buildLinkCollection)
-      .then(dl.buildDownloadHtml)
-      .then(dl.distributeHTMLData);
-  },
-
 };
 
 module.exports = dl;
