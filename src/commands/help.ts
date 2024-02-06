@@ -3,7 +3,7 @@ import { checkPrefix, embedTemplate, doNotNotifyReply, titleCase } from "../util
 const prefix = checkPrefix();
 
 
-const help: Command = {
+const helpCommand: Command = {
 
   name: 'help',
   aliases: ['h', 'commands'],
@@ -72,4 +72,4 @@ const help: Command = {
   },
 };
 
-export default help;
+export default helpCommand;

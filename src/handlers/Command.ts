@@ -9,11 +9,13 @@ export default (client: Client) => {
 
   CommandImports.forEach(item => {
     client.commands.set(item.name, item);
+    logger.debug(`Loaded message command: ${item.name}`);
   });
-  logger.info(`Loaded ${client.commands.size} classic command(s)`);
+  logger.info(`Loaded ${client.commands.size} message command(s)`);
 
   SlashCommandImports.forEach(item => {
     client.slashCommands.set(item.command.name, item);
+    logger.debug(`Loaded slash command: ${item.command.name}`);
   });
   logger.info(`Loaded ${client.slashCommands.size} slash command(s)`);
 

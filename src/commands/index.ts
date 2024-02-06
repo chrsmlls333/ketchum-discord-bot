@@ -1,8 +1,8 @@
 import type { Command } from '../types';
-import help from './help';
-import invite from './invite';
-import download from './download';
+import helpCommand from './help';
+import inviteCommand from './invite';
+import downloadCommand from './download';
 
-const commands: Command[] = [ help, invite, download ];
+const commands: Command[] = [ helpCommand, inviteCommand, downloadCommand ];
 
 export default commands;

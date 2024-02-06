@@ -83,7 +83,7 @@ interface AttachmentData {
   url: string,
 }
 
-const download: Command = {
+const downloadCommand: Command = {
 
   name: 'download',
   aliases: ['dl', 'save'],
@@ -377,9 +377,9 @@ const steps = {
   fetchChannelsCombine: (data: ScanData) => {
 
     // Setup cancelling by command
-    const cancelRegex = new RegExp(`^\\${prefix}(${download.cancelAliases?.join('|')})$`, 'i');
+    const cancelRegex = new RegExp(`^\\${prefix}(${downloadCommand.cancelAliases?.join('|')})$`, 'i');
     const filter: CollectorFilter<[Message<boolean>, Collection<string, Message<boolean>>]> = 
-      m => typeof download.cancelAliases !== 'undefined' &&
+      m => typeof downloadCommand.cancelAliases !== 'undefined' &&
            cancelRegex.test(m.content) &&
            m.author.id === data.commandMessage.author.id;
     const cancelCollector = data.commandMessage.channel.createMessageCollector({ filter, max: 1 });
@@ -541,4 +541,4 @@ const steps = {
   },
 };
 
-export default download;
+export default downloadCommand;

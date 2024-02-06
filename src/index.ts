@@ -29,6 +29,7 @@ if (anonymous) logger.info('Running anonymously...');
 const prefix = checkPrefix();
 logger.info(`Using prefix: ${prefix}`);
 
+// discord.js recommends polluting client namespace with "global" collections
 import { Command, SlashCommand } from './types';
 client.slashCommands = new Collection<string, SlashCommand>();
 client.commands = new Collection<string, Command>();
@@ -36,6 +37,7 @@ client.cooldowns = new Collection<string, number>();
 
 import handlers from './handlers';
 handlers.forEach(handler => handler.default(client));
+
 
 client.login(process.env.BOT_TOKEN);
 

@@ -2,7 +2,7 @@ import type { Command } from "../types";
 import { embedTemplate, generateInvite } from "../utils";
 
 
-const invite: Command = {
+const inviteCommand: Command = {
 
   name: 'invite',
   aliases: ['getinvite'],
@@ -23,4 +23,4 @@ const invite: Command = {
   },
 };
 
-export default invite;
+export default inviteCommand;
