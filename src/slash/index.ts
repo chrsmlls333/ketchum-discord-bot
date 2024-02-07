@@ -1,5 +1,5 @@
-import { SlashCommand } from '../types';
-import helpSlashCommand from './help';
+import type { SlashCommand } from '../types';
+import { helpSlashCommand } from './help';
 
 const slashCommands: SlashCommand[] = [ helpSlashCommand ];
 

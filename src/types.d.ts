@@ -1,7 +1,7 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, Client, ClientEvents, Collection, Events, Message, ModalSubmitInteraction, PermissionResolvable, SlashCommandBuilder } from "discord.js"
 
 export interface SlashCommand {
-  command: SlashCommandBuilder,
+  command: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">,
   execute: (interaction : ChatInputCommandInteraction) => void,
   autocomplete?: (interaction: AutocompleteInteraction) => void,
   modal?: (interaction: ModalSubmitInteraction<CacheType>) => void,

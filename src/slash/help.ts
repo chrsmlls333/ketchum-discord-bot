@@ -6,7 +6,7 @@ const prefix = checkPrefix();
 
 import commands from '../commands';
 
-const helpSlashCommand: SlashCommand = {
+export const helpSlashCommand: SlashCommand = {
 
   command: new SlashCommandBuilder()
     .setName(helpCommand.name)
@@ -26,7 +26,7 @@ const helpSlashCommand: SlashCommand = {
         .setDescription('The command to get help for')
         .setRequired(false)
         .addChoices(...commandNameChoices)
-    }) as SlashCommandBuilder,
+    }),
 
   execute: async (interaction) => {
     const { commands, slashCommands } = interaction.client;
@@ -55,5 +55,3 @@ const helpSlashCommand: SlashCommand = {
     return interaction.reply({ content: 'that\'s not a valid command!', ephemeral: true });
   }
 };
-
-export default helpSlashCommand;

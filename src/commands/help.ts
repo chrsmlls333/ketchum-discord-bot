@@ -81,19 +81,18 @@ export function buildGenericHelpEmbed(client: Client<true>) {
 }
 
 export function buildCommandHelpEmbed(client: Client<true>, command: Command) {
-  const fields = [
-    { name: 'Command Name', value: `${prefix}${command.name}`, inline: true },
-    command.aliases.length > 0 &&
-    { name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}`, inline: true },
-    command.cancelAliases &&
-    { name: 'Cancel With', value: `${command.cancelAliases ? command.cancelAliases.map(a => prefix + a).join(', ') : 'none'}`, inline: true },
-    command.description &&
-    { name: 'Description', value: `${command.description}` },
-    command.usage &&
-    { name: 'Usage', value: `${prefix}${command.name} ${command.usage}`, inline: true },
-    { name: 'Arguments Required?', value: titleCase(command.args.toString()), inline: true },
-    // { name: 'Cooldown', value: `${command.cooldown || 3} second(s)`, inline: true },
-  ].filter(f => f) as RestOrArray<APIEmbedField>;
+  const fields: RestOrArray<APIEmbedField> = []
+  fields.push({ name: 'Command Name', value: `${prefix}${command.name}`, inline: true });
+  if (command.aliases.length > 0) 
+    fields.push({ name: 'Aliases', value: `${command.aliases.map(a => prefix + a).join(', ')}`, inline: true })
+  if (command.cancelAliases) 
+    fields.push({ name: 'Cancel With', value: `${command.cancelAliases ? command.cancelAliases.map(a => prefix + a).join(', ') : 'none'}`, inline: true })
+  if (command.description) 
+    fields.push({ name: 'Description', value: `${command.description}` })
+  if (command.usage) 
+    fields.push({ name: 'Usage', value: `${prefix}${command.name} ${command.usage}`, inline: true })
+  fields.push({ name: 'Arguments Required?', value: titleCase(command.args.toString()), inline: true })
+  // { name: 'Cooldown', value: `${command.cooldown || 3} second(s)`, inline: true },
 
   return embedTemplate(client)
     .setTitle(titleCase(command.name))
@@ -101,15 +100,15 @@ export function buildCommandHelpEmbed(client: Client<true>, command: Command) {
 }
 
 export function buildSlashCommandHelpEmbed(client: Client<true>, command: SlashCommand) {
-  const fields = [
-    { name: 'Command Name', value: `/${command.command.name}`, inline: true },
-    command.command.description &&
-    { name: 'Description', value: `${command.command.description}` },
-    command.command.options &&
-    { name: 'Options', value: `${command.command.options.map(o => (o as any).name ?? '').join(', ')}`, inline: true },
-    // { name: 'Cooldown', value: `${command.cooldown || 3} second(s)`, inline: true },
-    // { name: 'Learn More', value: `This is integrated into your server's '/' commands list.` },
-  ].filter(f => f) as RestOrArray<APIEmbedField>;
+  const fields: RestOrArray<APIEmbedField> = []
+  fields.push({ name: 'Command Name', value: `/${command.command.name}`, inline: true })
+  if (command.command.description)
+    fields.push({ name: 'Description', value: `${command.command.description}` })
+  const options = command.command.options?.map(o => (o as any).name).join(', ')
+  if (options) 
+    fields.push({ name: 'Options', value: `${options}`, inline: true })
+  // { name: 'Cooldown', value: `${command.cooldown || 3} second(s)`, inline: true },
+  // { name: 'Learn More', value: `This is integrated into your server's '/' commands list.` },
 
   return embedTemplate(client)
     .setTitle(titleCase(command.command.name))
