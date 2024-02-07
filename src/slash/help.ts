@@ -5,6 +5,8 @@ import { checkPrefix } from "../utils";
 const prefix = checkPrefix();
 
 import commands from '../commands';
+import { inviteSlashCommand } from "./invite";
+
 
 export const helpSlashCommand: SlashCommand = {
 
@@ -15,6 +17,7 @@ export const helpSlashCommand: SlashCommand = {
       // make custom slashCommand array to thwart circular dependency
       // TODO: replace this with autocomplete choices
       const slashCommands: SlashCommand[] = [
+        inviteSlashCommand
       ]
       const commandNameChoices: APIApplicationCommandOptionChoice<string>[] = [
         commands.map(c => prefix + c.name),

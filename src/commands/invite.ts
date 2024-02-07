@@ -1,8 +1,9 @@
+import { Client } from "discord.js";
 import type { Command } from "../types";
 import { embedTemplate, generateInvite } from "../utils";
 
 
-const inviteCommand: Command = {
+export const inviteCommand: Command = {
 
   name: 'invite',
   aliases: ['getinvite'],
@@ -15,12 +16,15 @@ const inviteCommand: Command = {
   usage: undefined,
 
   execute(message) {
-    const link = generateInvite(message.client);
-    const embed = embedTemplate(message.client)
-      .setTitle(`Invite ${message.client.user.username} to other servers!`)
-      .setURL(link);
+    const embed = buildInviteEmbed(message.client);
     return message.channel.send({ embeds: [embed] });
   },
 };
 
-export default inviteCommand;
+export function buildInviteEmbed(client: Client<true>) {
+  const link = generateInvite(client);
+  const embed = embedTemplate(client)
+    .setTitle(`Invite ${client.user.username} to other servers!`)
+    .setURL(link);
+  return embed;
+}
