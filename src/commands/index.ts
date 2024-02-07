@@ -1,5 +1,5 @@
 import type { Command } from '../types';
-import helpCommand from './help';
+import { helpCommand } from './help';
 import inviteCommand from './invite';
 import downloadCommand from './download';
 
