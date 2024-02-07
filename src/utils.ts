@@ -31,6 +31,7 @@ export function generateInvite(client: Client) {
       PermissionsBitField.Flags.AttachFiles,
       PermissionsBitField.Flags.ReadMessageHistory,
       PermissionsBitField.Flags.AddReactions,
+      PermissionsBitField.Flags.UseApplicationCommands,
     ],
   });
 }
